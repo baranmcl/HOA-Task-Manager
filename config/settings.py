@@ -29,8 +29,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "axes",
-    # "apps.accounts",  # TODO uncomment in Task 3
-    # "apps.roster",  # TODO uncomment in Task 3
+    "apps.accounts",
+    "apps.roster",
 ]
 
 MIDDLEWARE = [

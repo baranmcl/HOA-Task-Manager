@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.urls import path
+from django.urls import include, path
 
 
 @login_required
@@ -11,7 +11,7 @@ def home(request):
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # path("accounts/", include("apps.accounts.urls", namespace="accounts")),  # Task 3
-    # path("roster/", include("apps.roster.urls", namespace="roster")),  # Task 3
+    path("accounts/", include("apps.accounts.urls", namespace="accounts")),
+    path("roster/", include("apps.roster.urls", namespace="roster")),
     path("", home, name="home"),
 ]
