@@ -1,0 +1,12 @@
+<tr>
+  <td class="px-4 py-3">
+    <a href="{% url 'roster:detail' person.pk %}" class="text-blue-700 hover:underline font-medium">{{ person.name }}</a>
+    {% if person.archived %}<span class="ml-2 pill bg-gray-200 text-gray-700">archived</span>{% endif %}
+  </td>
+  <td class="px-4 py-3 text-sm text-gray-700">{{ person.role_title|default:"—" }}</td>
+  <td class="px-4 py-3 text-sm text-gray-700">{{ person.email|default:"—" }}</td>
+  <td class="px-4 py-3 text-sm text-gray-700">{{ person.phone|default:"—" }}</td>
+  <td class="px-4 py-3 text-right text-sm">
+    <a href="{% url 'roster:edit' person.pk %}" class="text-gray-600 hover:text-gray-900">Edit</a>
+  </td>
+</tr>

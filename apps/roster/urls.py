@@ -1,13 +1,14 @@
-from django.http import Http404
 from django.urls import path
 
-
-def _stub(request):
-    raise Http404
-
+from . import views
 
 app_name = "roster"
+
 urlpatterns = [
-    # Stub so sidebar roster:list reference resolves before the real view is added.
-    path("", _stub, name="list"),
+    path("", views.list_view, name="list"),
+    path("new/", views.create, name="create"),
+    path("<int:pk>/", views.detail, name="detail"),
+    path("<int:pk>/edit/", views.edit, name="edit"),
+    path("<int:pk>/archive/", views.archive, name="archive"),
+    path("<int:pk>/unarchive/", views.unarchive, name="unarchive"),
 ]
