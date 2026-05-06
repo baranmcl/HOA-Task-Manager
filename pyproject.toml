@@ -5,7 +5,7 @@ description = "Task and project tracker for HOA board work"
 requires-python = ">=3.12"
 dependencies = [
     "django>=5.0,<5.1",
-    "django-axes>=6.4",
+    "django-axes>=8.3",
     "gunicorn>=21.2",
     "whitenoise>=6.6",
 ]
@@ -26,4 +26,4 @@ select = ["E", "F", "I", "B", "UP", "DJ"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
-python_files = ["test_*.py"]
+python_files = ["test_*.py", "*_test.py"]
