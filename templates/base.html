@@ -1,0 +1,27 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}HOA Task Manager{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full">
+  {% if user.is_authenticated %}
+    <div class="flex min-h-full">
+      {% include "_sidebar.html" %}
+      <main class="flex-1 px-6 py-6">
+        {% include "_messages.html" %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  {% else %}
+    <main class="min-h-full flex items-center justify-center px-6 py-12">
+      {% include "_messages.html" %}
+      {% block unauth_content %}{% endblock %}
+    </main>
+  {% endif %}
+</body>
+</html>

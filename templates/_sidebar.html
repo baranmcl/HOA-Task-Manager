@@ -1,0 +1,13 @@
+{% load static %}
+<aside class="w-56 shrink-0 bg-white border-r border-gray-200 px-4 py-6 hidden md:block">
+  <div class="text-lg font-semibold text-gray-900 mb-6">HOA Tasks</div>
+  <nav class="space-y-1 text-sm">
+    <a href="{% url 'home' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a>
+    <a href="{% url 'roster:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Roster</a>
+    <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Account</a>
+    <form method="post" action="{% url 'accounts:logout' %}" class="pt-4">
+      {% csrf_token %}
+      <button type="submit" class="w-full text-left px-3 py-2 rounded hover:bg-gray-100">Log out</button>
+    </form>
+  </nav>
+</aside>
