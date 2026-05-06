@@ -1,0 +1,29 @@
+[project]
+name = "hoa-task-manager"
+version = "0.1.0"
+description = "Task and project tracker for HOA board work"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.0,<5.1",
+    "django-axes>=6.4",
+    "gunicorn>=21.2",
+    "whitenoise>=6.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "ruff>=0.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
