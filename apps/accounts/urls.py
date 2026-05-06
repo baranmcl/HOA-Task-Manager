@@ -8,6 +8,8 @@ def _stub(request):
 
 app_name = "accounts"
 urlpatterns = [
-    # Stub so LOGIN_URL = "accounts:login" resolves before Task 7 adds the real view.
+    # Stubs so sidebar URL references resolve before Task 7 adds real views.
     path("login/", _stub, name="login"),
+    path("logout/", _stub, name="logout"),
+    path("profile/", _stub, name="profile"),
 ]
