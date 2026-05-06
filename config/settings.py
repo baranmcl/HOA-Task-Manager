@@ -10,7 +10,8 @@ SECRET_KEY = os.environ.get(
     "dev-only-insecure-key-do-not-use-in-prod",
 )
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+# Local dev requires: export DJANGO_DEBUG=True (never commit that to a file)
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.environ.get(
     "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1"
@@ -113,7 +114,7 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = False  # Fly proxy handles HTTPS termination/redirect
     SECURE_REFERRER_POLICY = "same-origin"
 
 # django-axes: 5 attempts, 15-min lockout
