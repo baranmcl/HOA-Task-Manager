@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Account — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">Account</h1>
+
+<div class="bg-white rounded-lg shadow p-6 max-w-md">
+  <dl class="space-y-2 text-sm mb-6">
+    <div class="flex"><dt class="w-32 text-gray-500">Email</dt><dd class="text-gray-900">{{ user.email|default:user.username }}</dd></div>
+    <div class="flex"><dt class="w-32 text-gray-500">Timezone</dt><dd class="text-gray-900">{{ profile.timezone }}</dd></div>
+  </dl>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div>
+      <label for="id_timezone" class="label">Change timezone</label>
+      {{ form.timezone }}
+    </div>
+    <button type="submit" class="btn-primary">Save</button>
+  </form>
+
+  <hr class="my-6">
+  <a href="{% url 'accounts:password_change' %}" class="btn-secondary">Change password</a>
+</div>
+{% endblock %}
