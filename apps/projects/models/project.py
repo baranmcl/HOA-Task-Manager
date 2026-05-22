@@ -94,7 +94,6 @@ class Project(models.Model):
         indexes = [
             models.Index(fields=["status", "projected_completion_date"]),
             models.Index(fields=["is_recurring_template", "is_active"]),
-            models.Index(fields=["category"]),
         ]
 
     def __str__(self):
