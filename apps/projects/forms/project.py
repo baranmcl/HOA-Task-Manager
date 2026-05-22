@@ -7,6 +7,10 @@ _TEXTAREA = {"class": "input", "rows": 4}
 
 
 class ProjectForm(forms.ModelForm):
+    FINANCIAL_FIELD_NAMES = (
+        "budget_amount", "actual_cost", "vendor_name", "vendor_bid_amount",
+    )
+
     tags_text = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={**_INPUT, "placeholder": "concrete, sprinklers"}),

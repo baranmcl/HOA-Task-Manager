@@ -9,6 +9,7 @@ SEED = [
     ("Security", 4),
     ("Maintenance", 5),
     ("Financial", 6),
+    ("Misc", 7),
 ]
 
 
