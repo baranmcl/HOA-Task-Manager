@@ -1,3 +1,6 @@
+from .attachment import attachment_delete as attachment_delete
+from .attachment import attachment_download as attachment_download
+from .attachment import attachment_upload as attachment_upload
 from .inline import budget_edit as budget_edit
 from .inline import budget_save as budget_save
 from .inline import budget_show as budget_show

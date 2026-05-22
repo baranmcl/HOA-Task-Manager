@@ -1,0 +1,5 @@
+<ul id="attachments-list-{{ project.pk }}" class="space-y-2 mb-3">
+  {% for f in project.attachments.all %}{% include "projects/_attachment_row.html" %}{% empty %}
+    <li class="text-sm text-gray-400">No files attached.</li>
+  {% endfor %}
+</ul>
