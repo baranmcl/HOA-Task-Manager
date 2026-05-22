@@ -1,0 +1,13 @@
+<form id="field-budget-{{ project.pk }}"
+      hx-post="{% url 'projects:inline_budget_save' project.pk %}"
+      hx-target="#field-budget-{{ project.pk }}" hx-swap="outerHTML"
+      class="flex gap-2 items-center">
+  <input type="number" step="0.01" name="budget_amount" placeholder="Budget"
+    value="{{ project.budget_amount|default_if_none:'' }}" class="input">
+  <input type="number" step="0.01" name="actual_cost" placeholder="Actual"
+    value="{{ project.actual_cost|default_if_none:'' }}" class="input">
+  <button type="submit" class="btn-primary text-xs">Save</button>
+  <button type="button" class="btn-secondary text-xs"
+    hx-get="{% url 'projects:inline_budget_show' project.pk %}"
+    hx-target="#field-budget-{{ project.pk }}" hx-swap="outerHTML">Cancel</button>
+</form>

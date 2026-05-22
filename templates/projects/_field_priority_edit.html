@@ -1,0 +1,14 @@
+<form id="field-priority-{{ project.pk }}"
+      hx-post="{% url 'projects:inline_priority_save' project.pk %}"
+      hx-target="#field-priority-{{ project.pk }}" hx-swap="outerHTML"
+      class="flex gap-2">
+  <select name="priority" class="input">
+    {% for value, label in priority_choices %}
+      <option value="{{ value }}" {% if project.priority == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn-primary text-xs">Save</button>
+  <button type="button" class="btn-secondary text-xs"
+    hx-get="{% url 'projects:inline_priority_show' project.pk %}"
+    hx-target="#field-priority-{{ project.pk }}" hx-swap="outerHTML">Cancel</button>
+</form>

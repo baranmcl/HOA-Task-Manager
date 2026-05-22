@@ -1,0 +1,17 @@
+<form id="field-status-{{ project.pk }}"
+      hx-post="{% url 'projects:inline_status_save' project.pk %}"
+      hx-target="#field-status-{{ project.pk }}" hx-swap="outerHTML"
+      class="flex flex-col gap-2">
+  <select name="status" class="input">
+    {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <textarea name="delay_reason" rows="2" placeholder="Reason if Delayed…" class="input">{{ project.delay_reason }}</textarea>
+  <div class="flex gap-2">
+    <button type="submit" class="btn-primary text-xs">Save</button>
+    <button type="button" class="btn-secondary text-xs"
+      hx-get="{% url 'projects:inline_status_show' project.pk %}"
+      hx-target="#field-status-{{ project.pk }}" hx-swap="outerHTML">Cancel</button>
+  </div>
+</form>

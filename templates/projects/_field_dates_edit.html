@@ -1,0 +1,11 @@
+<form id="field-dates-{{ project.pk }}"
+      hx-post="{% url 'projects:inline_dates_save' project.pk %}"
+      hx-target="#field-dates-{{ project.pk }}" hx-swap="outerHTML"
+      class="flex gap-2 items-center">
+  <input type="date" name="projected_completion_date"
+    value="{{ project.projected_completion_date|date:'Y-m-d' }}" class="input">
+  <button type="submit" class="btn-primary text-xs">Save</button>
+  <button type="button" class="btn-secondary text-xs"
+    hx-get="{% url 'projects:inline_dates_show' project.pk %}"
+    hx-target="#field-dates-{{ project.pk }}" hx-swap="outerHTML">Cancel</button>
+</form>
