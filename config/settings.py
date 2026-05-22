@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "axes",
     "apps.accounts",
     "apps.roster",
+    "apps.projects",
 ]
 
 MIDDLEWARE = [
