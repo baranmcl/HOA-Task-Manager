@@ -11,8 +11,7 @@ urlpatterns = [
     path("<int:pk>/", views.detail, name="detail"),
     path("<int:pk>/edit/", views.edit, name="edit"),
 
-    # --- HTMX / action endpoints: stubbed here so detail.html renders;
-    #     replaced with real views in Tasks 13-16. ---
+    # --- HTMX / action endpoints (detail page) ---
     path("<int:pk>/inline/status/edit/", views.status_edit, name="inline_status_edit"),
     path("<int:pk>/inline/status/show/", views.status_show, name="inline_status_show"),
     path("<int:pk>/inline/status/save/", views.status_save, name="inline_status_save"),
