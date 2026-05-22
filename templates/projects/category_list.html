@@ -40,7 +40,16 @@
           </form>
         </td>
         <td class="px-4 py-3 text-sm text-gray-700">{{ category.project_count }}</td>
-        <td class="px-4 py-3 text-right"></td>
+        <td class="px-4 py-3 text-right">
+          {% if category.project_count %}
+            <span class="text-xs text-gray-400">in use by {{ category.project_count }} project{{ category.project_count|pluralize }}</span>
+          {% else %}
+            <form method="post" action="{% url 'projects:category_delete' category.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="text-sm text-red-700 hover:underline">Delete</button>
+            </form>
+          {% endif %}
+        </td>
       </tr>
       {% empty %}
       <tr><td colspan="3" class="px-4 py-8 text-center text-gray-400">No categories yet.</td></tr>

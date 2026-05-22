@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import ProjectCategoryForm
@@ -53,4 +54,18 @@ def category_rename(request, pk):
         category.name = new_name
         category.save()
         messages.success(request, "Category renamed.")
+    return redirect("projects:category_list")
+
+
+@login_required
+def category_delete(request, pk):
+    if request.method != "POST":
+        return redirect("projects:category_list")
+    category = get_object_or_404(ProjectCategory, pk=pk)
+    try:
+        name = category.name
+        category.delete()
+        messages.success(request, f"Deleted category “{name}”.")
+    except ProtectedError:
+        messages.error(request, "Cannot delete a category that is in use by projects.")
     return redirect("projects:category_list")

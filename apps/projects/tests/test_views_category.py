@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.messages import get_messages
 from django.urls import reverse
 
 from apps.projects.models import Project, ProjectCategory
@@ -86,3 +87,22 @@ def test_category_rename_rejects_duplicate(auth_client, category):
     )
     other.refresh_from_db()
     assert other.name == "Operational"
+
+
+@pytest.mark.django_db
+def test_category_delete_unused(auth_client, category):
+    response = auth_client.post(reverse("projects:category_delete", args=[category.pk]))
+    assert response.status_code == 302
+    assert not ProjectCategory.objects.filter(pk=category.pk).exists()
+    msgs = [m.message for m in get_messages(response.wsgi_request)]
+    assert any("Deleted" in m for m in msgs)
+
+
+@pytest.mark.django_db
+def test_category_delete_in_use_is_blocked(auth_client, category, user):
+    Project.objects.create(title="P1", category=category, created_by=user)
+    response = auth_client.post(reverse("projects:category_delete", args=[category.pk]))
+    assert response.status_code == 302
+    assert ProjectCategory.objects.filter(pk=category.pk).exists()
+    msgs = [m.message for m in get_messages(response.wsgi_request)]
+    assert any("in use" in m for m in msgs)
