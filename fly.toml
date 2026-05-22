@@ -5,7 +5,11 @@ primary_region = "iad"
 
 [env]
   DJANGO_DEBUG = "False"
-  DJANGO_ALLOWED_HOSTS = "hoa-task-manager-staging.fly.dev"
+  # "*" because the machine only receives traffic via Fly's proxy (which
+  # routes by hostname) and internal health checks that hit the private
+  # address with a non-public Host header. CSRF_TRUSTED_ORIGINS below stays
+  # pinned to the real domain — that is the setting that gates form posts.
+  DJANGO_ALLOWED_HOSTS = "*"
   DJANGO_CSRF_TRUSTED_ORIGINS = "https://hoa-task-manager-staging.fly.dev"
   DJANGO_DB_PATH = "/data/db.sqlite3"
 
