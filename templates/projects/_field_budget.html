@@ -1,0 +1,13 @@
+{% load humanize %}
+<div id="field-budget-{{ project.pk }}" class="flex items-center gap-3">
+  <span class="text-gray-800">
+    {% if project.budget_amount %}${{ project.budget_amount|floatformat:2|intcomma }}{% else %}— budget{% endif %}
+    /
+    {% if project.actual_cost %}${{ project.actual_cost|floatformat:2|intcomma }}{% else %}— actual{% endif %}
+  </span>
+  <button type="button"
+    hx-get="{% url 'projects:inline_budget_edit' project.pk %}"
+    hx-target="#field-budget-{{ project.pk }}"
+    hx-swap="outerHTML"
+    class="text-xs text-blue-600 hover:underline">edit</button>
+</div>

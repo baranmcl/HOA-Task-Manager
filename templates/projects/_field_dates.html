@@ -1,0 +1,11 @@
+<div id="field-dates-{{ project.pk }}" class="flex items-center gap-3">
+  <span class="text-gray-800">
+    Projected: {{ project.projected_completion_date|default:"—" }}
+    {% if project.actual_completion_date %} · Completed: {{ project.actual_completion_date }}{% endif %}
+  </span>
+  <button type="button"
+    hx-get="{% url 'projects:inline_dates_edit' project.pk %}"
+    hx-target="#field-dates-{{ project.pk }}"
+    hx-swap="outerHTML"
+    class="text-xs text-blue-600 hover:underline">edit</button>
+</div>

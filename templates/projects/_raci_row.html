@@ -1,0 +1,12 @@
+<li class="flex items-center justify-between text-sm">
+  <span>
+    <span class="pill bg-gray-100 text-gray-700 mr-2">{{ a.role|first|upper }}</span>
+    {{ a.person.name }}{% if a.person.archived %} <span class="text-xs text-gray-400">(archived)</span>{% endif %}
+  </span>
+  <button type="button"
+    hx-post="{% url 'projects:raci_remove' a.pk %}"
+    hx-target="#raci-list-{{ project.pk }}"
+    hx-swap="outerHTML"
+    hx-confirm="Remove this assignment?"
+    class="text-xs text-red-600 hover:underline">remove</button>
+</li>

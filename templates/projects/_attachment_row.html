@@ -1,0 +1,11 @@
+<li class="flex items-center justify-between text-sm">
+  <a href="{% url 'projects:attachment_download' f.pk %}" class="text-blue-700 hover:underline">{{ f.original_filename }}</a>
+  <span class="text-xs text-gray-500">{{ f.human_size }} ·
+    <button type="button"
+      hx-post="{% url 'projects:attachment_delete' f.pk %}"
+      hx-target="#attachments-list-{{ project.pk }}"
+      hx-swap="outerHTML"
+      hx-confirm="Delete {{ f.original_filename|escapejs }}?"
+      class="text-red-600 hover:underline">delete</button>
+  </span>
+</li>

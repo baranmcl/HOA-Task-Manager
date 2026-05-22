@@ -1,0 +1,17 @@
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Board approval</h2>
+  {% if project.board_approval %}
+    <dl class="text-sm space-y-1">
+      <div class="flex"><dt class="w-32 text-gray-500">Motion</dt><dd class="text-gray-800 whitespace-pre-wrap">{{ project.board_approval.motion_text }}</dd></div>
+      <div class="flex"><dt class="w-32 text-gray-500">Vote date</dt><dd class="text-gray-800">{{ project.board_approval.vote_date }}</dd></div>
+      <div class="flex"><dt class="w-32 text-gray-500">Tally</dt><dd class="text-gray-800">{{ project.board_approval.vote_summary }} (for-against-abstain)</dd></div>
+      {% if project.board_approval.minutes_reference %}
+      <div class="flex"><dt class="w-32 text-gray-500">Minutes</dt><dd class="text-gray-800">{{ project.board_approval.minutes_reference }}</dd></div>
+      {% endif %}
+    </dl>
+    <a href="{% url 'projects:approval_edit' project.pk %}" class="text-xs text-blue-600 hover:underline mt-3 inline-block">Edit approval</a>
+  {% else %}
+    <p class="text-sm text-gray-400 mb-2">No board approval recorded.</p>
+    <a href="{% url 'projects:approval_add' project.pk %}" class="btn-secondary text-xs">+ Record approval</a>
+  {% endif %}
+</section>

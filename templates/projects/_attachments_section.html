@@ -1,0 +1,18 @@
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Attachments</h2>
+  <ul id="attachments-list-{{ project.pk }}" class="space-y-2 mb-3">
+    {% for f in project.attachments.all %}{% include "projects/_attachment_row.html" %}{% empty %}
+      <li class="text-sm text-gray-400">No files attached.</li>
+    {% endfor %}
+  </ul>
+  <form hx-post="{% url 'projects:attachment_upload' project.pk %}"
+        hx-encoding="multipart/form-data"
+        hx-target="#attachments-list-{{ project.pk }}"
+        hx-swap="outerHTML"
+        class="flex gap-2 text-sm items-center">
+    {% csrf_token %}
+    <input type="file" name="file" required class="text-xs">
+    <button type="submit" class="btn-secondary">Upload</button>
+  </form>
+  <p class="text-xs text-gray-500 mt-2">Limits: 10 MB / file, 50 MB / project. PDF, JPG, PNG, DOCX, XLSX.</p>
+</section>

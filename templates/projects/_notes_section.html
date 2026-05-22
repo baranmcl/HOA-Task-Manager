@@ -1,0 +1,16 @@
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Notes</h2>
+  <form hx-post="{% url 'projects:note_add' project.pk %}"
+        hx-target="#notes-list-{{ project.pk }}"
+        hx-swap="outerHTML"
+        class="mb-4">
+    {% csrf_token %}
+    <textarea name="body" rows="3" class="input mb-2" placeholder="Add a note (markdown supported)…" required></textarea>
+    <button type="submit" class="btn-primary text-xs">Add note</button>
+  </form>
+  <ul id="notes-list-{{ project.pk }}" class="space-y-3">
+    {% for n in project.notes.all %}{% include "projects/_note_card.html" %}{% empty %}
+      <li class="text-sm text-gray-400">No notes yet.</li>
+    {% endfor %}
+  </ul>
+</section>

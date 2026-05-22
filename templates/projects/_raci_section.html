@@ -1,0 +1,24 @@
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">RACI</h2>
+  <ul id="raci-list-{{ project.pk }}" class="space-y-1 mb-3">
+    {% for a in project.raci_assignments.all %}{% include "projects/_raci_row.html" %}{% empty %}
+      <li class="text-sm text-gray-400">No assignments yet.</li>
+    {% endfor %}
+  </ul>
+  <form hx-post="{% url 'projects:raci_add' project.pk %}"
+        hx-target="#raci-list-{{ project.pk }}"
+        hx-swap="outerHTML"
+        class="flex gap-2 text-sm">
+    {% csrf_token %}
+    <select name="person" class="input flex-1">
+      <option value="">Select person…</option>
+      {% for p in available_people %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
+    </select>
+    <select name="role" class="input">
+      {% for value, label in raci_role_choices %}
+        <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn-secondary">Add</button>
+  </form>
+</section>
