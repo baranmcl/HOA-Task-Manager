@@ -42,5 +42,11 @@ COPY --from=css /app/static/css/output.css ./static/css/output.css
 RUN DJANGO_SECRET_KEY=build-only DJANGO_DEBUG=False DJANGO_ALLOWED_HOSTS=* \
     uv run python manage.py collectstatic --noinput
 
+# Entrypoint runs migrations on the app machine (volume is mounted here),
+# then execs gunicorn. Migrations cannot run in Fly's release_command
+# machine because it does not mount the /data volume that SQLite lives on.
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 EXPOSE 8000
-CMD ["uv", "run", "gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-"]
+CMD ["/entrypoint.sh"]
