@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Case, Count, IntegerField, Q, When
 from django.shortcuts import render
 
 from apps.roster.models import RosterPerson
@@ -8,8 +8,6 @@ from ..models import Project, ProjectCategory, ProjectStatus
 
 SORT_CHOICES = {
     "updated": "-updated_at",
-    "due": "projected_completion_date",
-    "priority": "priority",
     "title": "title",
 }
 
@@ -17,7 +15,10 @@ SORT_CHOICES = {
 @login_required
 def list_view(request):
     qs = Project.instances.select_related("category").prefetch_related(
-        "raci_assignments__person", "tags",
+        "raci_assignments__person",
+    ).annotate(
+        note_count=Count("notes", distinct=True),
+        attachment_count=Count("attachments", distinct=True),
     )
 
     show_completed = request.GET.get("show_completed") == "1"
@@ -41,13 +42,22 @@ def list_view(request):
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
 
     sort_key = request.GET.get("sort", "updated")
-    order_field = SORT_CHOICES.get(sort_key, "-updated_at")
-    if order_field == "projected_completion_date":
-        # QuerySet.extra() is the documented way to get NULLs-last ordering on SQLite  # noqa: S608
+    if sort_key == "priority":
+        qs = qs.annotate(
+            _priority_order=Case(
+                When(priority="high", then=0),
+                When(priority="medium", then=1),
+                default=2,
+                output_field=IntegerField(),
+            )
+        ).order_by("_priority_order", "title")
+    elif sort_key == "due":
+        # Django sqlite: place NULLs last via a synthetic boolean column
         qs = qs.extra(  # noqa: S608
             select={"_no_due": "projected_completion_date IS NULL"}
         ).order_by("_no_due", "projected_completion_date")
     else:
+        order_field = SORT_CHOICES.get(sort_key, "-updated_at")
         qs = qs.order_by(order_field)
 
     return render(request, "projects/list.html", {

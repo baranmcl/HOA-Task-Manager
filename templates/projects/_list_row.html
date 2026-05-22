@@ -10,7 +10,7 @@
   <td class="px-3 py-3">
     <a href="{% url 'projects:detail' p.pk %}" class="text-blue-700 font-medium hover:underline">{{ p.title }}</a>
     <div class="text-xs text-gray-500">
-      {{ p.notes.count }} note{{ p.notes.count|pluralize }} · {{ p.attachments.count }} file{{ p.attachments.count|pluralize }}
+      {{ p.note_count }} note{{ p.note_count|pluralize }} · {{ p.attachment_count }} file{{ p.attachment_count|pluralize }}
     </div>
   </td>
   <td class="px-3 py-3"><span class="pill bg-gray-100 text-gray-700">{{ p.category.name }}</span></td>

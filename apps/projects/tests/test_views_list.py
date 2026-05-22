@@ -83,3 +83,17 @@ def test_list_empty_state(auth_client):
     response = auth_client.get(reverse("projects:list"))
     assert response.status_code == 200
     assert b"No projects yet" in response.content
+
+
+@pytest.mark.django_db
+def test_list_sort_by_priority(auth_client, user, category):
+    from apps.projects.models import ProjectPriority
+    Project.objects.create(title="LowP", category=category, created_by=user,
+                            priority=ProjectPriority.LOW)
+    Project.objects.create(title="HighP", category=category, created_by=user,
+                            priority=ProjectPriority.HIGH)
+    Project.objects.create(title="MediumP", category=category, created_by=user,
+                            priority=ProjectPriority.MEDIUM)
+    response = auth_client.get(reverse("projects:list") + "?sort=priority")
+    body = response.content.decode()
+    assert body.index("HighP") < body.index("MediumP") < body.index("LowP")
