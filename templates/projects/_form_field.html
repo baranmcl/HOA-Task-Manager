@@ -1,0 +1,8 @@
+<div>
+  <label class="label" for="{{ field.id_for_label }}">
+    {{ field.label }}{% if field.field.required %} *{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>{% endif %}
+  {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+</div>

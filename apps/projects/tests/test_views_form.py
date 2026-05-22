@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 import pytest
 from django.urls import reverse
 
@@ -38,3 +40,25 @@ def test_edit_post_updates(auth_client, project):
     project.refresh_from_db()
     assert project.title == "Renamed"
     assert project.priority == "high"
+
+
+@pytest.mark.django_db
+def test_create_form_financial_section_collapsed(auth_client, category):
+    response = auth_client.get(reverse("projects:create"))
+    content = response.content.decode()
+    assert "<details" in content
+    assert "<details open" not in content
+
+
+@pytest.mark.django_db
+def test_edit_form_financial_section_open_when_data_present(auth_client, project):
+    project.budget_amount = Decimal("1500.00")
+    project.save()
+    response = auth_client.get(reverse("projects:edit", args=[project.pk]))
+    assert "<details open" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_edit_form_financial_section_collapsed_when_no_data(auth_client, project):
+    response = auth_client.get(reverse("projects:edit", args=[project.pk]))
+    assert "<details open" not in response.content.decode()
