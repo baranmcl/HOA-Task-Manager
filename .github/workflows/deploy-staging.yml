@@ -1,8 +1,14 @@
-name: Deploy to staging
+name: Deploy to staging (Fly — dormant)
 
+# Retained but inactive: staging currently runs on PythonAnywhere (see
+# docs/runbooks/deploy-pythonanywhere.md). This workflow only runs when
+# triggered by hand from the Actions tab. To return to Fly auto-deploy,
+# restore the `push` trigger below:
+#   on:
+#     push:
+#       branches: [main]
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:

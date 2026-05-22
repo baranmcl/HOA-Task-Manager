@@ -12,7 +12,10 @@ __pycache__/
 media/
 
 # Tailwind
-static/css/output.css
+# output.css IS committed: PythonAnywhere has no build step, so the compiled
+# CSS ships via git. Rebuild locally (bin/tailwindcss -i input.css -o output.css
+# --minify) and commit when templates or input.css change. The Fly Docker build
+# regenerates it regardless.
 node_modules/
 
 # Tooling
