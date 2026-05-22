@@ -5,6 +5,7 @@ from .attachment import attachment_download as attachment_download
 from .attachment import attachment_upload as attachment_upload
 from .category import category_add as category_add
 from .category import category_list as category_list
+from .category import category_rename as category_rename
 from .inline import budget_edit as budget_edit
 from .inline import budget_save as budget_save
 from .inline import budget_show as budget_show

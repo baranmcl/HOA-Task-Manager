@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import ProjectCategoryForm
 from ..models import ProjectCategory
@@ -37,3 +37,20 @@ def category_add(request):
         "categories": _categories_with_counts(),
         "add_form": form,
     })
+
+
+@login_required
+def category_rename(request, pk):
+    if request.method != "POST":
+        return redirect("projects:category_list")
+    category = get_object_or_404(ProjectCategory, pk=pk)
+    new_name = request.POST.get("name", "").strip()
+    if not new_name:
+        messages.error(request, "Category name cannot be blank.")
+    elif ProjectCategory.objects.exclude(pk=pk).filter(name=new_name).exists():
+        messages.error(request, f"A category named “{new_name}” already exists.")
+    else:
+        category.name = new_name
+        category.save()
+        messages.success(request, "Category renamed.")
+    return redirect("projects:category_list")

@@ -54,3 +54,35 @@ def test_category_add_rejects_duplicate(auth_client, category):
     assert response.status_code == 200
     assert response.context["add_form"].errors
     assert ProjectCategory.objects.filter(name=category.name).count() == 1
+
+
+@pytest.mark.django_db
+def test_category_rename(auth_client, category):
+    response = auth_client.post(
+        reverse("projects:category_rename", args=[category.pk]),
+        {"name": "Capital Projects"},
+    )
+    assert response.status_code == 302
+    category.refresh_from_db()
+    assert category.name == "Capital Projects"
+
+
+@pytest.mark.django_db
+def test_category_rename_rejects_blank(auth_client, category):
+    auth_client.post(
+        reverse("projects:category_rename", args=[category.pk]),
+        {"name": "   "},
+    )
+    category.refresh_from_db()
+    assert category.name == "Capital"
+
+
+@pytest.mark.django_db
+def test_category_rename_rejects_duplicate(auth_client, category):
+    other = ProjectCategory.objects.create(name="Operational", display_order=2)
+    auth_client.post(
+        reverse("projects:category_rename", args=[other.pk]),
+        {"name": "Capital"},
+    )
+    other.refresh_from_db()
+    assert other.name == "Operational"

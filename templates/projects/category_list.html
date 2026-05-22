@@ -31,7 +31,14 @@
     <tbody class="divide-y divide-gray-100">
       {% for category in categories %}
       <tr>
-        <td class="px-4 py-3 text-sm text-gray-900">{{ category.name }}</td>
+        <td class="px-4 py-3">
+          <form method="post" action="{% url 'projects:category_rename' category.pk %}"
+                class="flex gap-2 items-center">
+            {% csrf_token %}
+            <input type="text" name="name" value="{{ category.name }}" class="input">
+            <button type="submit" class="btn-secondary">Rename</button>
+          </form>
+        </td>
         <td class="px-4 py-3 text-sm text-gray-700">{{ category.project_count }}</td>
         <td class="px-4 py-3 text-right"></td>
       </tr>
