@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Project, ProjectCategory, RACIAssignment, Tag
+from .models import BoardApproval, Project, ProjectCategory, RACIAssignment, Tag
 
 
 @admin.register(ProjectCategory)
@@ -33,3 +33,9 @@ class RACIAssignmentAdmin(admin.ModelAdmin):
     list_display = ("project", "person", "role")
     list_filter = ("role",)
     autocomplete_fields = ("project", "person")
+
+
+@admin.register(BoardApproval)
+class BoardApprovalAdmin(admin.ModelAdmin):
+    list_display = ("project", "vote_date", "vote_summary")
+    autocomplete_fields = ("project",)
