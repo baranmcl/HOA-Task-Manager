@@ -19,6 +19,9 @@
   </form>
 
   <hr class="my-6">
-  <a href="{% url 'accounts:password_change' %}" class="btn-secondary">Change password</a>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'accounts:password_change' %}" class="btn-secondary">Change password</a>
+    <a href="{% url 'projects:category_list' %}" class="btn-secondary">Manage project categories</a>
+  </div>
 </div>
 {% endblock %}
