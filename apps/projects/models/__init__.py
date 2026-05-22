@@ -2,6 +2,7 @@ from .activity import ActivityLog
 from .approval import BoardApproval
 from .attachment import Attachment
 from .category import ProjectCategory, Tag
+from .generation import GenerationLog
 from .note import UpdateNote
 from .project import (
     Project,
@@ -15,6 +16,7 @@ __all__ = [
     "ActivityLog",
     "Attachment",
     "BoardApproval",
+    "GenerationLog",
     "ProjectCategory",
     "Tag",
     "UpdateNote",

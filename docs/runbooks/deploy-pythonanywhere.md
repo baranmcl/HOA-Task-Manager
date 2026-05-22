@@ -217,11 +217,10 @@ The next `git pull` on PythonAnywhere then brings the updated CSS.
   *throttles* the app (slower) until midnight UTC — it does not stop. Ample
   for a single-user-to-small-team admin tool.
 - **No scheduled tasks:** free accounts created after Jan 2026 do not get
-  PythonAnywhere's scheduled-task feature. Plan 1 has no scheduled jobs, so
-  this does not affect the current app — but **Plan 2's daily recurring-task
-  generator will need an alternative** (a lazy "generate on first visit of
-  the day" trigger, or a free external cron service pinging a URL). To be
-  solved when Plan 2 is implemented.
+  PythonAnywhere's scheduled-task feature. This is solved: Plan 2's
+  recurring-instance generator now runs automatically via
+  `RecurringGenerationMiddleware`, which triggers it lazily on the first web
+  request of each day — no scheduled task needed.
 
 ---
 
