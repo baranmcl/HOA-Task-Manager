@@ -48,7 +48,7 @@ def _project_log(sender, instance, created, **kwargs):
         )
         return
     old_status = getattr(instance, "_old_status", None)
-    if old_status and old_status != instance.status:
+    if old_status is not None and old_status != instance.status:
         ActivityLog.objects.create(
             project=instance, actor=actor, verb="changed status",
             before_value={"status": old_status},

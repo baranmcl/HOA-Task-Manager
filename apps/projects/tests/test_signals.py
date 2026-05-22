@@ -1,7 +1,10 @@
+import datetime as dt
+
 import pytest
 
 from apps.projects.models import (
     ActivityLog,
+    BoardApproval,
     Project,
     ProjectStatus,
     RACIAssignment,
@@ -44,4 +47,20 @@ def test_raci_remove_logs(user, project, person):
     a = RACIAssignment.objects.create(project=project, person=person, role=RACIRole.CONSULTED)
     a.delete()
     log = ActivityLog.objects.filter(project=project, verb="removed RACI assignment").first()
+    assert log is not None
+    assert log.before_value == {"person": person.name, "role": "consulted"}
+
+
+@pytest.mark.django_db
+def test_approval_save_logs(user, project):
+    set_actor(user)
+    BoardApproval.objects.create(
+        project=project,
+        motion_text="Approve it",
+        vote_date=dt.date(2026, 4, 15),
+        votes_for=4, votes_against=0, votes_abstain=0,
+    )
+    log = ActivityLog.objects.filter(
+        project=project, verb="added board approval"
+    ).first()
     assert log is not None

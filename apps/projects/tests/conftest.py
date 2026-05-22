@@ -2,6 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from apps.projects.models import ProjectCategory
+from apps.projects.signals import set_actor
 from apps.roster.models import RosterPerson
 
 
@@ -39,3 +40,11 @@ def project(db, user, category):
         category=category,
         created_by=user,
     )
+
+
+@pytest.fixture(autouse=True)
+def _reset_actor():
+    """Reset the signal actor before/after every test so ordering can't leak it."""
+    set_actor(None)
+    yield
+    set_actor(None)
