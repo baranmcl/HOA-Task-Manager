@@ -1,0 +1,5 @@
+<ul id="notes-list-{{ project.pk }}" class="space-y-3">
+  {% for n in project.notes.all %}{% include "projects/_note_card.html" %}{% empty %}
+    <li class="text-sm text-gray-400">No notes yet.</li>
+  {% endfor %}
+</ul>

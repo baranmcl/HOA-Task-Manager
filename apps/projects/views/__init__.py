@@ -13,6 +13,7 @@ from .inline import status_show as status_show
 from .inline import vendor_edit as vendor_edit
 from .inline import vendor_save as vendor_save
 from .inline import vendor_show as vendor_show
+from .note import note_add as note_add
 from .project_detail import detail as detail
 from .project_form import create as create
 from .project_form import edit as edit
