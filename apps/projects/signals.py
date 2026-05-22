@@ -11,8 +11,7 @@ from .models import (
     Project,
     RACIAssignment,
 )
-
-# from .models.attachment import Attachment  # noqa: E501  -- uncommented in Task 9
+from .models.attachment import Attachment
 
 _state = threading.local()
 
@@ -96,27 +95,27 @@ def _approval_saved(sender, instance, created, **kwargs):
     )
 
 
-# --- Attachment (uncommented in Task 9, when the Attachment model exists) ---
+# --- Attachment ---
 
-# @receiver(post_save, sender=Attachment)
-# def _attachment_added(sender, instance, created, **kwargs):
-#     if not created:
-#         return
-#     actor = _actor()
-#     if actor is None:
-#         return
-#     ActivityLog.objects.create(
-#         project=instance.project, actor=actor, verb="added attachment",
-#         after_value={"filename": instance.original_filename},
-#     )
-#
-#
-# @receiver(post_delete, sender=Attachment)
-# def _attachment_removed(sender, instance, **kwargs):
-#     actor = _actor()
-#     if actor is None:
-#         return
-#     ActivityLog.objects.create(
-#         project=instance.project, actor=actor, verb="removed attachment",
-#         before_value={"filename": instance.original_filename},
-#     )
+@receiver(post_save, sender=Attachment)
+def _attachment_added(sender, instance, created, **kwargs):
+    if not created:
+        return
+    actor = _actor()
+    if actor is None:
+        return
+    ActivityLog.objects.create(
+        project=instance.project, actor=actor, verb="added attachment",
+        after_value={"filename": instance.original_filename},
+    )
+
+
+@receiver(post_delete, sender=Attachment)
+def _attachment_removed(sender, instance, **kwargs):
+    actor = _actor()
+    if actor is None:
+        return
+    ActivityLog.objects.create(
+        project=instance.project, actor=actor, verb="removed attachment",
+        before_value={"filename": instance.original_filename},
+    )

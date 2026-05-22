@@ -130,3 +130,8 @@ DEFAULT_USER_TIMEZONE = "America/New_York"
 
 # Silence axes warning: locking by username only is an intentional design choice
 SILENCED_SYSTEM_CHECKS = ["axes.W006"]
+
+R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL", "")
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "")
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")
+R2_BUCKET = os.environ.get("R2_BUCKET", "")
