@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if is_new %}Add{% else %}Edit{% endif %} approval — {{ project.title }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">
+  {% if is_new %}Record board approval{% else %}Edit board approval{% endif %}
+</h1>
+<form method="post" class="bg-white rounded-lg shadow p-6 max-w-2xl space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-2 pt-2">
+    <button type="submit" class="btn-primary">Save</button>
+    <a href="{% url 'projects:detail' project.pk %}" class="btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

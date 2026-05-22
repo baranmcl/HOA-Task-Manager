@@ -1,3 +1,5 @@
+from .approval import approval_add as approval_add
+from .approval import approval_edit as approval_edit
 from .attachment import attachment_delete as attachment_delete
 from .attachment import attachment_download as attachment_download
 from .attachment import attachment_upload as attachment_upload
@@ -21,3 +23,5 @@ from .project_detail import detail as detail
 from .project_form import create as create
 from .project_form import edit as edit
 from .project_list import list_view as list_view
+from .raci import raci_add as raci_add
+from .raci import raci_remove as raci_remove

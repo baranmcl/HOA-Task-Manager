@@ -6,8 +6,7 @@
     {% endfor %}
   </ul>
   <form hx-post="{% url 'projects:raci_add' project.pk %}"
-        hx-target="closest section"
-        hx-swap="outerHTML"
+        hx-target="closest section" hx-swap="outerHTML"
         class="flex gap-2 text-sm">
     {% csrf_token %}
     <select name="person" class="input flex-1">
@@ -15,9 +14,7 @@
       {% for p in available_people %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
     </select>
     <select name="role" class="input">
-      {% for value, label in raci_role_choices %}
-        <option value="{{ value }}">{{ label }}</option>
-      {% endfor %}
+      {% for value, label in raci_role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
     </select>
     <button type="submit" class="btn-secondary">Add</button>
   </form>

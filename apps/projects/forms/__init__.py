@@ -1,4 +1,3 @@
-from .note import UpdateNoteForm
-from .project import ProjectForm
-
-__all__ = ["ProjectForm", "UpdateNoteForm"]
+from .approval import BoardApprovalForm as BoardApprovalForm
+from .note import UpdateNoteForm as UpdateNoteForm
+from .project import ProjectForm as ProjectForm

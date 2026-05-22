@@ -1,14 +1,8 @@
-from django.http import Http404
 from django.urls import path
 
 from . import views
 
 app_name = "projects"
-
-
-def _stub(request, *args, **kwargs):
-    """Placeholder for endpoints wired by later tasks (13-16)."""
-    raise Http404
 
 
 urlpatterns = [
@@ -38,8 +32,8 @@ urlpatterns = [
     path("<int:pk>/attachment/upload/", views.attachment_upload, name="attachment_upload"),
     path("attachment/<int:pk>/delete/", views.attachment_delete, name="attachment_delete"),
     path("attachment/<int:pk>/download/", views.attachment_download, name="attachment_download"),
-    path("<int:pk>/raci/add/", _stub, name="raci_add"),
-    path("raci/<int:pk>/remove/", _stub, name="raci_remove"),
-    path("<int:pk>/approval/add/", _stub, name="approval_add"),
-    path("<int:pk>/approval/edit/", _stub, name="approval_edit"),
+    path("<int:pk>/raci/add/", views.raci_add, name="raci_add"),
+    path("raci/<int:pk>/remove/", views.raci_remove, name="raci_remove"),
+    path("<int:pk>/approval/add/", views.approval_add, name="approval_add"),
+    path("<int:pk>/approval/edit/", views.approval_edit, name="approval_edit"),
 ]
