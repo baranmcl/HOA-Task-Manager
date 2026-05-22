@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{% if template %}Edit{% else %}New{% endif %} recurring template{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">
+  {% if template %}Edit {{ template.title }}{% else %}New recurring template{% endif %}
+</h1>
+<form method="post" class="bg-white rounded-lg shadow p-6 max-w-2xl space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% if field.name == "is_active" %}
+        <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %}> Active (will generate instances)</label>
+      {% else %}
+        {{ field }}
+      {% endif %}
+      {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-2 pt-2">
+    <button type="submit" class="btn-primary">Save</button>
+    <a href="{% url 'projects:recurring_list' %}" class="btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
