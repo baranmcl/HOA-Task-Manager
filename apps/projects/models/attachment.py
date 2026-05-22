@@ -23,14 +23,14 @@ class Attachment(models.Model):
 
     @property
     def human_size(self) -> str:
-        size = self.size_bytes
+        size = float(self.size_bytes)
         for unit in ["B", "KB", "MB", "GB"]:
-            if size < 1000 or unit == "GB":
+            if round(size, 1) < 1000 or unit == "GB":
                 if unit == "B":
                     return f"{int(size)} B"
                 return f"{size:.1f} {unit}"
             size /= 1000
-        return f"{size:.1f} GB"
+        return f"{size:.1f} GB"  # pragma: no cover - loop always returns
 
     @classmethod
     def total_bytes_for_project(cls, project) -> int:

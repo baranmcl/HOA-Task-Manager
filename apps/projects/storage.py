@@ -66,12 +66,13 @@ def upload_fileobj(fileobj, key: str, content_type: str) -> None:
 
 
 def signed_download_url(key: str, *, filename: str, expires_in: int = 300) -> str:
+    safe_filename = filename.replace("\\", "").replace('"', "").replace("\r", "").replace("\n", "")
     return _client().generate_presigned_url(
         "get_object",
         Params={
             "Bucket": settings.R2_BUCKET,
             "Key": key,
-            "ResponseContentDisposition": f'attachment; filename="{filename}"',
+            "ResponseContentDisposition": f'attachment; filename="{safe_filename}"',
         },
         ExpiresIn=expires_in,
     )
