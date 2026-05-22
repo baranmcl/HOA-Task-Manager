@@ -3,8 +3,8 @@
   <nav class="space-y-1 text-sm">
     <a href="{% url 'home' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a>
     <a href="{% url 'projects:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Projects</a>
-    <a href="{% url 'roster:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Roster</a>
     <a href="{% url 'projects:recurring_list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Recurring</a>
+    <a href="{% url 'roster:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Roster</a>
     <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Account</a>
     <form method="post" action="{% url 'accounts:logout' %}" class="pt-4">
       {% csrf_token %}
