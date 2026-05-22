@@ -1,7 +1,68 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block title %}Dashboard — HOA Task Manager{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-semibold text-gray-900 mb-2">Dashboard</h1>
-<p class="text-gray-600">Welcome, {{ user.email|default:user.username }}.</p>
-<p class="text-gray-600 mt-4">Project tracking lands in Plan 2.</p>
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs uppercase text-gray-500">Overdue</div>
+    <div class="text-3xl font-semibold {% if stats.overdue %}text-red-700{% endif %}">{{ stats.overdue }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs uppercase text-gray-500">Upcoming (14d)</div>
+    <div class="text-3xl font-semibold">{{ stats.upcoming }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs uppercase text-gray-500">In progress</div>
+    <div class="text-3xl font-semibold">{{ stats.in_progress }}</div>
+  </div>
+  <div class="bg-white rounded-lg shadow p-4">
+    <div class="text-xs uppercase text-gray-500">Done this month</div>
+    <div class="text-3xl font-semibold">{{ stats.done_this_month }}</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <section class="bg-white rounded-lg shadow p-5">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Overdue</h2>
+    {% if overdue %}
+      <ul class="divide-y divide-gray-100">
+        {% for p in overdue %}
+        <li class="py-2 flex items-center justify-between text-sm">
+          <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
+          <span class="text-red-700">{{ p.projected_completion_date }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}<p class="text-gray-400 text-sm">Nothing overdue. Nice.</p>{% endif %}
+  </section>
+
+  <section class="bg-white rounded-lg shadow p-5">
+    <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Upcoming (next 14 days)</h2>
+    {% if upcoming %}
+      <ul class="divide-y divide-gray-100">
+        {% for p in upcoming %}
+        <li class="py-2 flex items-center justify-between text-sm">
+          <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
+          <span class="text-gray-700">{{ p.projected_completion_date }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}<p class="text-gray-400 text-sm">Nothing on deck.</p>{% endif %}
+  </section>
+</div>
+
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Recent activity</h2>
+  <ul class="space-y-2 text-sm">
+    {% for log in activity %}
+      <li>
+        <span class="text-gray-500">{{ log.created_at|date:"M j · g:i A" }}</span> —
+        <strong>{{ log.actor.email|default:log.actor.username }}</strong> {{ log.verb }}
+        {% if log.project %}on <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' log.project.pk %}">{{ log.project.title }}</a>{% endif %}
+      </li>
+    {% empty %}<li class="text-gray-400">No activity yet.</li>{% endfor %}
+  </ul>
+</section>
 {% endblock %}
