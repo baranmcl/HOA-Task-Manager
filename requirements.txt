@@ -4,6 +4,14 @@ asgiref==3.11.1
     # via
     #   django
     #   django-axes
+bleach==6.3.0
+    # via hoa-task-manager
+boto3==1.43.13
+    # via hoa-task-manager
+botocore==1.43.13
+    # via
+    #   boto3
+    #   s3transfer
 django==5.0.14
     # via
     #   django-axes
@@ -12,11 +20,29 @@ django-axes==8.3.1
     # via hoa-task-manager
 gunicorn==26.0.0
     # via hoa-task-manager
+jmespath==1.1.0
+    # via
+    #   boto3
+    #   botocore
+markdown==3.10.2
+    # via hoa-task-manager
 packaging==26.2
     # via gunicorn
+python-dateutil==2.9.0.post0
+    # via
+    #   botocore
+    #   hoa-task-manager
+s3transfer==0.17.0
+    # via boto3
+six==1.17.0
+    # via python-dateutil
 sqlparse==0.5.5
     # via django
 tzdata==2026.2 ; sys_platform == 'win32'
     # via django
+urllib3==2.7.0
+    # via botocore
+webencodings==0.5.1
+    # via bleach
 whitenoise==6.12.0
     # via hoa-task-manager
