@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{% if project %}Edit {{ project.title }}{% else %}New project{% endif %}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">
+  {% if project %}Edit {{ project.title }}{% else %}New project{% endif %}
+</h1>
+
+<form method="post" class="bg-white rounded-lg shadow p-6 max-w-3xl space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="label" for="{{ field.id_for_label }}">
+        {{ field.label }}{% if field.field.required %} *{% endif %}
+      </label>
+      {{ field }}
+      {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>{% endif %}
+      {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-2 pt-4">
+    <button type="submit" class="btn-primary">Save</button>
+    <a href="{% if project %}{% url 'projects:detail' project.pk %}{% else %}{% url 'projects:list' %}{% endif %}"
+       class="btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}
