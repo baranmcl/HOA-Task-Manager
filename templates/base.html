@@ -8,7 +8,7 @@
   <script src="{% static 'js/htmx.min.js' %}" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
-<body class="h-full">
+<body class="h-full" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% if user.is_authenticated %}
     <div class="flex min-h-full">
       {% include "_sidebar.html" %}
