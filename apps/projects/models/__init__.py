@@ -5,6 +5,7 @@ from .project import (
     ProjectStatus,
     RecurrenceRule,
 )
+from .raci import RACIAssignment, RACIRole
 
 __all__ = [
     "ProjectCategory",
@@ -13,4 +14,6 @@ __all__ = [
     "ProjectStatus",
     "ProjectPriority",
     "RecurrenceRule",
+    "RACIAssignment",
+    "RACIRole",
 ]

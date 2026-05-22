@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Project, ProjectCategory, Tag
+from .models import Project, ProjectCategory, RACIAssignment, Tag
 
 
 @admin.register(ProjectCategory)
@@ -26,3 +26,10 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ("title", "description", "vendor_name")
     autocomplete_fields = ("category",)
     filter_horizontal = ("tags",)
+
+
+@admin.register(RACIAssignment)
+class RACIAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("project", "person", "role")
+    list_filter = ("role",)
+    autocomplete_fields = ("project", "person")
