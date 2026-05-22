@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Projects — HOA Task Manager{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-semibold text-gray-900">Projects</h1>
+  <a href="{% url 'projects:create' %}" class="btn-primary">+ New project</a>
+</div>
+
+<form method="get" class="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-6 gap-3 text-sm">
+  <input name="q" value="{{ q }}" placeholder="Search…" class="input md:col-span-2">
+  <select name="status" class="input">
+    <option value="">All statuses</option>
+    {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <select name="category" class="input">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c.pk }}" {% if selected_category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+    {% endfor %}
+  </select>
+  <select name="person" class="input">
+    <option value="">Any person</option>
+    {% for p in people %}
+      <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+    {% endfor %}
+  </select>
+  <select name="sort" class="input">
+    <option value="updated" {% if selected_sort == "updated" %}selected{% endif %}>Recently updated</option>
+    <option value="due" {% if selected_sort == "due" %}selected{% endif %}>Due date</option>
+    <option value="priority" {% if selected_sort == "priority" %}selected{% endif %}>Priority</option>
+    <option value="title" {% if selected_sort == "title" %}selected{% endif %}>Title</option>
+  </select>
+  <div class="md:col-span-6 flex items-center gap-4">
+    <label class="text-gray-700"><input type="checkbox" name="show_completed" value="1"
+      {% if show_completed %}checked{% endif %}> Show completed</label>
+    <button type="submit" class="btn-secondary ml-auto">Apply</button>
+  </div>
+</form>
+
+{% if projects %}
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <table class="min-w-full divide-y divide-gray-200 text-sm">
+    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+      <tr>
+        <th class="w-1 px-2 py-2"></th>
+        <th class="px-3 py-2 text-left">Title</th>
+        <th class="px-3 py-2 text-left">Category</th>
+        <th class="px-3 py-2 text-left">Status</th>
+        <th class="px-3 py-2 text-left">RACI</th>
+        <th class="px-3 py-2 text-left">Due</th>
+        <th class="px-3 py-2 text-left">Budget / Actual</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for p in projects %}{% include "projects/_list_row.html" %}{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+{% include "projects/_empty_state.html" %}
+{% endif %}
+{% endblock %}

@@ -12,7 +12,7 @@ def _stub(request, *args, **kwargs):
 
 
 urlpatterns = [
-    path("", _stub, name="list"),               # real view: Task 11
+    path("", views.list_view, name="list"),
     path("new/", views.create, name="create"),
     path("<int:pk>/", _stub, name="detail"),     # real view: Task 12
     path("<int:pk>/edit/", views.edit, name="edit"),
