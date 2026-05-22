@@ -6,6 +6,19 @@
   <a href="{% url 'accounts:profile' %}" class="text-blue-600 hover:underline text-sm">← Back to Account</a>
 </div>
 
+<form method="post" action="{% url 'projects:category_add' %}"
+      class="bg-white rounded-lg shadow p-4 mb-6 flex items-end gap-3 max-w-2xl">
+  {% csrf_token %}
+  <div class="flex-1">
+    <label class="label" for="{{ add_form.name.id_for_label }}">Add category</label>
+    {{ add_form.name }}
+    {% if add_form.name.errors %}
+      <p class="text-sm text-red-700 mt-1">{{ add_form.name.errors|join:", " }}</p>
+    {% endif %}
+  </div>
+  <button type="submit" class="btn-primary">+ Add</button>
+</form>
+
 <div class="bg-white rounded-lg shadow overflow-hidden max-w-2xl">
   <table class="min-w-full divide-y divide-gray-200">
     <thead class="bg-gray-50 text-xs uppercase text-gray-500">

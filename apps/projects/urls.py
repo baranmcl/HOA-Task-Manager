@@ -11,6 +11,7 @@ urlpatterns = [
     path("<int:pk>/", views.detail, name="detail"),
     path("<int:pk>/edit/", views.edit, name="edit"),
     path("categories/", views.category_list, name="category_list"),
+    path("categories/add/", views.category_add, name="category_add"),
 
     # --- HTMX / action endpoints (detail page) ---
     path("<int:pk>/inline/status/edit/", views.status_edit, name="inline_status_edit"),
