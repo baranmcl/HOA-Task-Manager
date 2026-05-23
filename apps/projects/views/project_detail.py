@@ -23,7 +23,10 @@ def detail(request, pk):
         ),
         pk=pk,
     )
-    activity = ActivityLog.objects.filter(project=project).select_related("actor")[:30]
+    activity = (
+        ActivityLog.objects.filter(project=project)
+        .select_related("actor__profile__roster_person")[:30]
+    )
     # All active roster people. The unique constraint on
     # (project, person, role) and the IntegrityError catch in raci_add
     # prevent true duplicates — letting the same person appear here

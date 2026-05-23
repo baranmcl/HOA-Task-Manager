@@ -61,7 +61,9 @@ def dashboard(request):
         ).distinct()
     done_this_month = done_this_month_qs.count()
 
-    activity_qs = ActivityLog.objects.select_related("actor", "project")
+    activity_qs = ActivityLog.objects.select_related(
+        "actor__profile__roster_person", "project",
+    )
     if person_id is not None:
         activity_qs = activity_qs.filter(
             project__raci_assignments__person_id=person_id,
