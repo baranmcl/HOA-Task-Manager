@@ -110,6 +110,29 @@ def test_activity_feed_scoped_to_filtered_person(
 
 
 @pytest.mark.django_db
+def test_activity_feed_renders_linked_roster_person_name(
+    auth_client, user, category, mike,
+):
+    """When the actor's profile is linked to a RosterPerson, the activity feed
+    must render that person's name — not the user's email or username.
+    """
+    user.profile.roster_person = mike
+    user.profile.save()
+    project = Project.objects.create(
+        title="Project A", category=category, created_by=user,
+        status=ProjectStatus.IN_PROGRESS,
+    )
+    RACIAssignment.objects.create(
+        project=project, person=mike, role=RACIRole.RESPONSIBLE,
+    )
+    ActivityLog.objects.create(actor=user, project=project, verb="updated status")
+    response = auth_client.get(reverse("home"))
+    content = response.content.decode()
+    assert ">Mike Smith</strong>" in content
+    assert user.email not in content.split(">Recent activity<")[1]
+
+
+@pytest.mark.django_db
 def test_unlinked_banner_renders_for_unlinked_user(auth_client):
     response = auth_client.get(reverse("home"))
     content = response.content.decode()

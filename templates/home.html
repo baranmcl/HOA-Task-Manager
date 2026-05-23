@@ -96,7 +96,7 @@
     {% for log in activity %}
       <li>
         <span class="text-gray-500">{{ log.created_at|date:"M j · g:i A" }}</span> —
-        <strong>{{ log.actor.email|default:log.actor.username }}</strong> {{ log.verb }}
+        <strong>{{ log.actor.profile.display_name }}</strong> {{ log.verb }}
         {% if log.project %}on <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' log.project.pk %}">{{ log.project.title }}</a>{% endif %}
       </li>
     {% empty %}<li class="text-gray-400">No activity yet.</li>{% endfor %}

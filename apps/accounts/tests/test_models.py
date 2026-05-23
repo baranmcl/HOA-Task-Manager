@@ -81,3 +81,38 @@ def test_userprofile_roster_person_defaults_to_none():
         password="Sufficiently-Long-Pw-1",
     )
     assert user.profile.roster_person is None
+
+
+@pytest.mark.django_db
+def test_display_name_uses_roster_person_when_linked():
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="grace@example.com",
+        email="grace@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    person = RosterPerson.objects.create(name="Grace Garcia")
+    user.profile.roster_person = person
+    user.profile.save()
+    assert user.profile.display_name == "Grace Garcia"
+
+
+@pytest.mark.django_db
+def test_display_name_falls_back_to_email_when_unlinked():
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="harry@example.com",
+        email="harry@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    assert user.profile.display_name == "harry@example.com"
+
+
+@pytest.mark.django_db
+def test_display_name_falls_back_to_username_when_no_email():
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="ivy_username_only",
+        password="Sufficiently-Long-Pw-1",
+    )
+    assert user.profile.display_name == "ivy_username_only"
