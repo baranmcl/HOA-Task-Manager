@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from ..forms import ProjectForm
-from ..models import Project
+from ..models import Project, RACIAssignment, RACIRole
 
 
 def _has_financial_data(project):
@@ -25,6 +25,13 @@ def create(request):
             project.created_by = request.user
             project.save()
             form.save_m2m_with_tags(project)
+            responsible = form.cleaned_data.get("initial_responsible")
+            if responsible:
+                RACIAssignment.objects.create(
+                    project=project,
+                    person=responsible,
+                    role=RACIRole.RESPONSIBLE,
+                )
             messages.success(request, "Project created.")
             return redirect("projects:detail", pk=project.pk)
     else:
