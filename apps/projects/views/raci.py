@@ -13,9 +13,10 @@ def _render_list(request, project):
     return render(request, "projects/_raci_list_swap.html", {
         "project": project,
         "raci_role_choices": RACIRole.choices,
-        "available_people": RosterPerson.active.exclude(
-            raci_assignments__project=project,
-        ).distinct(),
+        # All active roster people. Multi-role-per-person is allowed by
+        # the data model; the IntegrityError catch in raci_add rejects
+        # true (project, person, role) duplicates.
+        "available_people": RosterPerson.active.all(),
     })
 
 
