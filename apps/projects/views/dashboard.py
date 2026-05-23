@@ -68,6 +68,16 @@ def dashboard(request):
         ).distinct()
     activity = list(activity_qs[:10])
 
+    recurring_qs = Project.instances.filter(
+        status=ProjectStatus.NOT_STARTED,
+        parent_template__isnull=False,
+    ).select_related("parent_template").order_by("projected_completion_date")
+    if person_id is not None:
+        recurring_qs = recurring_qs.filter(
+            raci_assignments__person_id=person_id,
+        ).distinct()
+    recurring_on_deck = list(recurring_qs[:10])
+
     return render(request, "home.html", {
         "stats": {
             "overdue": len(overdue),
@@ -78,6 +88,7 @@ def dashboard(request):
         "overdue": overdue,
         "upcoming": upcoming,
         "activity": activity,
+        "recurring_on_deck": recurring_on_deck,
         "people": RosterPerson.active.all(),
         "selected_person": selected_person,
         "unlinked_user_banner": banner,

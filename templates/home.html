@@ -71,6 +71,25 @@
   </section>
 </div>
 
+<section class="bg-white rounded-lg shadow p-5 mb-8">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Recurring — coming up</h2>
+  {% if recurring_on_deck %}
+    <ul class="divide-y divide-gray-100">
+      {% for p in recurring_on_deck %}
+      <li class="py-2 flex items-center justify-between text-sm">
+        <div>
+          <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
+          <span class="text-xs text-gray-500 ml-2">from <em>{{ p.parent_template.title }}</em></span>
+        </div>
+        <span class="text-gray-700">{{ p.projected_completion_date|default:"—" }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-400 text-sm">No recurring tasks waiting to be started.</p>
+  {% endif %}
+</section>
+
 <section class="bg-white rounded-lg shadow p-5">
   <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Recent activity</h2>
   <ul class="space-y-2 text-sm">

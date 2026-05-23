@@ -131,3 +131,86 @@ def test_person_dropdown_renders_options(linked_client, projects_per_person, mik
     assert "All people" in content
     assert ">Mike Smith" in content or "Mike Smith</option>" in content
     assert ">Laurel Baran" in content or "Laurel Baran</option>" in content
+
+
+@pytest.mark.django_db
+def test_recurring_panel_includes_not_started_instances(auth_client, user, category):
+    today = dt.date.today()
+    template = Project.objects.create(
+        title="Monthly review", category=category, created_by=user,
+        is_recurring_template=True, is_active=True,
+        recurrence_rule="monthly",
+        next_due_date=today + dt.timedelta(days=30),
+    )
+    instance = Project.objects.create(
+        title="Monthly review — May 2026", category=category, created_by=user,
+        is_recurring_template=False,
+        status=ProjectStatus.NOT_STARTED,
+        parent_template=template,
+        projected_completion_date=today + dt.timedelta(days=30),
+    )
+    response = auth_client.get(reverse("home"))
+    titles = [p.title for p in response.context["recurring_on_deck"]]
+    assert "Monthly review — May 2026" in titles
+
+
+@pytest.mark.django_db
+def test_recurring_panel_excludes_one_off_not_started(auth_client, user, category):
+    Project.objects.create(
+        title="One-off draft", category=category, created_by=user,
+        status=ProjectStatus.NOT_STARTED,
+        parent_template=None,
+    )
+    response = auth_client.get(reverse("home"))
+    titles = [p.title for p in response.context["recurring_on_deck"]]
+    assert "One-off draft" not in titles
+
+
+@pytest.mark.django_db
+def test_recurring_panel_excludes_in_progress_recurring(auth_client, user, category):
+    today = dt.date.today()
+    template = Project.objects.create(
+        title="Monthly review", category=category, created_by=user,
+        is_recurring_template=True, is_active=True,
+        recurrence_rule="monthly",
+        next_due_date=today + dt.timedelta(days=30),
+    )
+    Project.objects.create(
+        title="Started instance", category=category, created_by=user,
+        is_recurring_template=False,
+        status=ProjectStatus.IN_PROGRESS,
+        parent_template=template,
+    )
+    response = auth_client.get(reverse("home"))
+    titles = [p.title for p in response.context["recurring_on_deck"]]
+    assert "Started instance" not in titles
+
+
+@pytest.mark.django_db
+def test_recurring_panel_respects_person_filter(linked_client, user, category, mike, laurel):
+    today = dt.date.today()
+    template = Project.objects.create(
+        title="Monthly review", category=category, created_by=user,
+        is_recurring_template=True, is_active=True,
+        recurrence_rule="monthly",
+        next_due_date=today + dt.timedelta(days=30),
+    )
+    mikes_instance = Project.objects.create(
+        title="For Mike", category=category, created_by=user,
+        is_recurring_template=False, status=ProjectStatus.NOT_STARTED,
+        parent_template=template,
+    )
+    RACIAssignment.objects.create(
+        project=mikes_instance, person=mike, role=RACIRole.RESPONSIBLE,
+    )
+    laurels_instance = Project.objects.create(
+        title="For Laurel", category=category, created_by=user,
+        is_recurring_template=False, status=ProjectStatus.NOT_STARTED,
+        parent_template=template,
+    )
+    RACIAssignment.objects.create(
+        project=laurels_instance, person=laurel, role=RACIRole.RESPONSIBLE,
+    )
+    response = linked_client.get(reverse("home"))
+    titles = [p.title for p in response.context["recurring_on_deck"]]
+    assert titles == ["For Mike"]
