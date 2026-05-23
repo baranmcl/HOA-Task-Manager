@@ -27,10 +27,18 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         today = dt.date.today()
-        object_key = f"{backup.BACKUP_PREFIX}{today.isoformat()}.sqlite3"
-
         log, _ = BackupLog.objects.get_or_create(run_date=today)
 
+        if not backup.is_configured():
+            log.error = "R2 not configured; backup skipped"
+            log.finished_at = timezone.now()
+            log.save()
+            self.stdout.write(self.style.WARNING(
+                "R2 not configured; backup skipped.",
+            ))
+            return
+
+        object_key = f"{backup.BACKUP_PREFIX}{today.isoformat()}.sqlite3"
         tmp_path = self._snapshot_sqlite()
         try:
             size_bytes = os.path.getsize(tmp_path)

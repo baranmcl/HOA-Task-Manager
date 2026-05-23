@@ -125,3 +125,28 @@ def test_backup_command_keeps_unparseable_keys(set_r2, monkeypatch):
     assert deletes == [
         f"{backup.BACKUP_PREFIX}{(dt.date.today() - dt.timedelta(days=50)).isoformat()}.sqlite3",
     ]
+
+
+@pytest.fixture
+def unset_r2(settings):
+    settings.R2_ENDPOINT_URL = ""
+    settings.R2_ACCESS_KEY_ID = ""
+    settings.R2_SECRET_ACCESS_KEY = ""
+    settings.R2_BUCKET = ""
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_command_skips_gracefully_when_r2_unconfigured(
+    unset_r2, monkeypatch,
+):
+    """In local dev R2 creds are blank; the command must skip without
+    crashing and record an explanatory message on the BackupLog row."""
+    uploads = []
+    monkeypatch.setattr(backup, "upload_backup", lambda *a: uploads.append(a))
+
+    call_command("backup_database")
+
+    assert uploads == []  # no upload attempted
+    log = BackupLog.objects.get(run_date=dt.date.today())
+    assert "not configured" in log.error.lower()
+    assert log.finished_at is not None
