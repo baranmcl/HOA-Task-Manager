@@ -1,5 +1,7 @@
 from django import forms
 
+from apps.roster.models import RosterPerson
+
 from ..models import Project, ProjectStatus, Tag
 
 _INPUT = {"class": "input"}
@@ -9,6 +11,15 @@ _TEXTAREA = {"class": "input", "rows": 4}
 class ProjectForm(forms.ModelForm):
     FINANCIAL_FIELD_NAMES = (
         "budget_amount", "actual_cost", "vendor_name", "vendor_bid_amount",
+    )
+
+    initial_responsible = forms.ModelChoiceField(
+        queryset=RosterPerson.active.all(),
+        required=False,
+        widget=forms.Select(attrs={**_INPUT}),
+        label="Responsible (optional)",
+        help_text="Sets one Responsible RACI assignment on the new project.",
+        empty_label="— none —",
     )
 
     tags_text = forms.CharField(
@@ -43,6 +54,7 @@ class ProjectForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             existing = ", ".join(self.instance.tags.values_list("name", flat=True))
             self.fields["tags_text"].initial = existing
+            self.fields.pop("initial_responsible", None)
 
     def clean(self):
         cleaned = super().clean()

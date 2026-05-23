@@ -63,3 +63,23 @@ def test_profile_update_timezone(client, user):
     assert response.status_code == 302
     user.profile.refresh_from_db()
     assert user.profile.timezone == "America/Los_Angeles"
+
+
+@pytest.mark.django_db
+def test_profile_form_saves_roster_person(client):
+    from apps.roster.models import RosterPerson
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="frank@example.com",
+        email="frank@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    person = RosterPerson.objects.create(name="Frank Fox", role_title="Treasurer")
+    client.force_login(user)
+    response = client.post(reverse("accounts:profile"), {
+        "timezone": "America/New_York",
+        "roster_person": person.pk,
+    })
+    assert response.status_code == 302
+    user.profile.refresh_from_db()
+    assert user.profile.roster_person == person

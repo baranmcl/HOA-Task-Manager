@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — HOA Task Manager{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+  <form method="get" class="flex items-center gap-2 text-sm">
+    <label for="dashboard-person" class="text-gray-700">Showing tasks for:</label>
+    <select id="dashboard-person" name="person" class="input" onchange="this.form.submit()">
+      <option value="all" {% if selected_person == "all" %}selected{% endif %}>All people</option>
+      {% for p in people %}
+        <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% if unlinked_user_banner %}
+<div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 mb-6 text-sm">
+  Link your account to a roster person in
+  <a href="{% url 'accounts:profile' %}" class="underline font-medium">Account</a>
+  to see only your tasks.
+</div>
+{% endif %}
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
   <div class="bg-white rounded-lg shadow p-4">
@@ -51,6 +70,25 @@
     {% else %}<p class="text-gray-400 text-sm">Nothing on deck.</p>{% endif %}
   </section>
 </div>
+
+<section class="bg-white rounded-lg shadow p-5 mb-8">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Recurring — coming up</h2>
+  {% if recurring_on_deck %}
+    <ul class="divide-y divide-gray-100">
+      {% for p in recurring_on_deck %}
+      <li class="py-2 flex items-center justify-between text-sm">
+        <div>
+          <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
+          <span class="text-xs text-gray-500 ml-2">from <em>{{ p.parent_template.title }}</em></span>
+        </div>
+        <span class="text-gray-700">{{ p.projected_completion_date|default:"—" }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-400 text-sm">No recurring tasks waiting to be started.</p>
+  {% endif %}
+</section>
 
 <section class="bg-white rounded-lg shadow p-5">
   <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Recent activity</h2>
