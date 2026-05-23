@@ -1,7 +1,10 @@
+import datetime as dt
+
 import pytest
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 
-from apps.accounts.models import UserProfile
+from apps.accounts.models import BackupLog, UserProfile
 from apps.roster.models import RosterPerson
 
 
@@ -120,9 +123,6 @@ def test_display_name_falls_back_to_username_when_no_email():
 
 @pytest.mark.django_db
 def test_backup_log_run_date_unique():
-    from django.db import IntegrityError
-    from apps.accounts.models import BackupLog
-    import datetime as dt
     BackupLog.objects.create(run_date=dt.date(2026, 5, 23))
     with pytest.raises(IntegrityError):
         BackupLog.objects.create(run_date=dt.date(2026, 5, 23))
@@ -130,8 +130,6 @@ def test_backup_log_run_date_unique():
 
 @pytest.mark.django_db
 def test_backup_log_optional_fields_default_blank():
-    from apps.accounts.models import BackupLog
-    import datetime as dt
     log = BackupLog.objects.create(run_date=dt.date(2026, 5, 24))
     assert log.finished_at is None
     assert log.bytes_uploaded is None
