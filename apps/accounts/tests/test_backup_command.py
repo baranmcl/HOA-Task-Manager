@@ -79,3 +79,49 @@ def test_backup_command_creates_backup_log_row(set_r2, stub_backup):
     assert log.finished_at is not None
     assert log.object_key == f"db-backups/{dt.date.today().isoformat()}.sqlite3"
     assert log.bytes_uploaded is not None and log.bytes_uploaded > 0
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_command_prunes_objects_older_than_30_days(
+    set_r2, monkeypatch,
+):
+    """Given 35 daily backups, the 5 oldest are deleted; 30 newest kept."""
+    today = dt.date.today()
+    existing_keys = [
+        f"{backup.BACKUP_PREFIX}{(today - dt.timedelta(days=offset)).isoformat()}.sqlite3"
+        for offset in range(1, 36)  # 35 backups, 1-35 days old
+    ]
+    deletes = []
+    monkeypatch.setattr(backup, "upload_backup", lambda *a: None)
+    monkeypatch.setattr(backup, "list_backup_keys", lambda: existing_keys)
+    monkeypatch.setattr(backup, "delete_backup", lambda key: deletes.append(key))
+
+    call_command("backup_database")
+
+    # The 5 oldest (31-35 days) must be deleted.
+    expected_deleted = {
+        f"{backup.BACKUP_PREFIX}{(today - dt.timedelta(days=offset)).isoformat()}.sqlite3"
+        for offset in range(31, 36)
+    }
+    assert set(deletes) == expected_deleted
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_command_keeps_unparseable_keys(set_r2, monkeypatch):
+    """A foreign key under the backup prefix (e.g. README) must NOT be deleted."""
+    existing_keys = [
+        f"{backup.BACKUP_PREFIX}README.txt",
+        f"{backup.BACKUP_PREFIX}not-a-date.sqlite3",
+        f"{backup.BACKUP_PREFIX}{(dt.date.today() - dt.timedelta(days=50)).isoformat()}.sqlite3",
+    ]
+    deletes = []
+    monkeypatch.setattr(backup, "upload_backup", lambda *a: None)
+    monkeypatch.setattr(backup, "list_backup_keys", lambda: existing_keys)
+    monkeypatch.setattr(backup, "delete_backup", lambda key: deletes.append(key))
+
+    call_command("backup_database")
+
+    # Only the parseable, > 30 days old key is deleted.
+    assert deletes == [
+        f"{backup.BACKUP_PREFIX}{(dt.date.today() - dt.timedelta(days=50)).isoformat()}.sqlite3",
+    ]

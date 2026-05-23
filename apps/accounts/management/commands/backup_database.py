@@ -2,6 +2,7 @@
 import datetime as dt
 import logging
 import os
+import re
 import sqlite3
 import tempfile
 
@@ -13,6 +14,12 @@ from apps.accounts import backup
 from apps.accounts.models import BackupLog
 
 logger = logging.getLogger(__name__)
+
+RETENTION_DAYS = 30
+# Matches db-backups/YYYY-MM-DD.sqlite3 — the format produced by this command.
+_KEY_DATE_PATTERN = re.compile(
+    rf"^{re.escape(backup.BACKUP_PREFIX)}(\d{{4}}-\d{{2}}-\d{{2}})\.sqlite3$",
+)
 
 
 class Command(BaseCommand):
@@ -39,6 +46,8 @@ class Command(BaseCommand):
         log.finished_at = timezone.now()
         log.save()
 
+        self._prune_old_backups(today)
+
         self.stdout.write(self.style.SUCCESS(
             f"Backed up {size_bytes} bytes to {object_key}",
         ))
@@ -63,3 +72,22 @@ class Command(BaseCommand):
         finally:
             dst.close()
         return tmp_path
+
+    @staticmethod
+    def _prune_old_backups(today: dt.date) -> None:
+        """Delete db-backups/* objects whose dated name is > RETENTION_DAYS old.
+
+        Keys not matching the `db-backups/YYYY-MM-DD.sqlite3` shape (a foreign
+        README, a typo'd manual upload) are left alone.
+        """
+        cutoff = today - dt.timedelta(days=RETENTION_DAYS)
+        for key in backup.list_backup_keys():
+            match = _KEY_DATE_PATTERN.match(key)
+            if not match:
+                continue
+            try:
+                key_date = dt.date.fromisoformat(match.group(1))
+            except ValueError:
+                continue
+            if key_date < cutoff:
+                backup.delete_backup(key)
