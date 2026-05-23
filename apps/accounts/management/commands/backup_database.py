@@ -39,22 +39,29 @@ class Command(BaseCommand):
             return
 
         object_key = f"{backup.BACKUP_PREFIX}{today.isoformat()}.sqlite3"
-        tmp_path = self._snapshot_sqlite()
+        size_bytes: int | None = None
         try:
-            size_bytes = os.path.getsize(tmp_path)
-            backup.upload_backup(tmp_path, object_key)
-        finally:
+            tmp_path = self._snapshot_sqlite()
             try:
-                os.unlink(tmp_path)
-            except OSError:
-                pass
+                size_bytes = os.path.getsize(tmp_path)
+                backup.upload_backup(tmp_path, object_key)
+            finally:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+            self._prune_old_backups(today)
+        except Exception as exc:  # noqa: BLE001
+            log.error = str(exc)[:2000]
+            log.finished_at = timezone.now()
+            log.save()
+            self.stdout.write(self.style.ERROR(f"Backup failed: {exc}"))
+            return
 
         log.object_key = object_key
         log.bytes_uploaded = size_bytes
         log.finished_at = timezone.now()
         log.save()
-
-        self._prune_old_backups(today)
 
         self.stdout.write(self.style.SUCCESS(
             f"Backed up {size_bytes} bytes to {object_key}",

@@ -150,3 +150,35 @@ def test_backup_command_skips_gracefully_when_r2_unconfigured(
     log = BackupLog.objects.get(run_date=dt.date.today())
     assert "not configured" in log.error.lower()
     assert log.finished_at is not None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_command_records_error_when_upload_fails(set_r2, monkeypatch):
+    """If upload_backup raises, the exception text lands on BackupLog.error
+    and the command exits cleanly (does not propagate)."""
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("R2 unreachable: simulated outage")
+
+    monkeypatch.setattr(backup, "upload_backup", boom)
+    monkeypatch.setattr(backup, "list_backup_keys", lambda: [])
+    monkeypatch.setattr(backup, "delete_backup", lambda key: None)
+
+    call_command("backup_database")  # must NOT raise
+
+    log = BackupLog.objects.get(run_date=dt.date.today())
+    assert "R2 unreachable" in log.error
+    assert log.finished_at is not None
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_command_truncates_error_to_2000_chars(set_r2, monkeypatch):
+    def boom(*args, **kwargs):
+        raise RuntimeError("X" * 5000)
+
+    monkeypatch.setattr(backup, "upload_backup", boom)
+
+    call_command("backup_database")
+
+    log = BackupLog.objects.get(run_date=dt.date.today())
+    assert len(log.error) <= 2000
