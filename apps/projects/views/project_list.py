@@ -4,7 +4,7 @@ from django.shortcuts import render
 
 from apps.roster.models import RosterPerson
 
-from ..models import Project, ProjectCategory, ProjectStatus
+from ..models import Project, ProjectCategory, ProjectStatus, RACIRole
 
 SORT_CHOICES = {
     "updated": "-updated_at",
@@ -34,8 +34,17 @@ def list_view(request):
         qs = qs.filter(category_id=int(cat_id))
 
     person_id = request.GET.get("person")
-    if person_id and person_id.isdigit():
+    role = request.GET.get("role", "")
+    role_valid = role in dict(RACIRole.choices)
+    if person_id and person_id.isdigit() and role_valid:
+        qs = qs.filter(
+            raci_assignments__person_id=int(person_id),
+            raci_assignments__role=role,
+        ).distinct()
+    elif person_id and person_id.isdigit():
         qs = qs.filter(raci_assignments__person_id=int(person_id)).distinct()
+    elif role_valid:
+        qs = qs.filter(raci_assignments__role=role).distinct()
 
     q = request.GET.get("q", "").strip()
     if q:
@@ -67,8 +76,10 @@ def list_view(request):
         "selected_status": status or "",
         "selected_category": cat_id or "",
         "selected_person": person_id or "",
+        "selected_role": role if role_valid else "",
         "selected_sort": sort_key,
         "show_completed": show_completed,
         "q": q,
         "status_choices": ProjectStatus.choices,
+        "role_choices": RACIRole.choices,
     })

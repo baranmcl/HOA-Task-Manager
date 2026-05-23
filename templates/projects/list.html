@@ -6,7 +6,7 @@
   <a href="{% url 'projects:create' %}" class="btn-primary">+ New project</a>
 </div>
 
-<form method="get" class="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-6 gap-3 text-sm">
+<form method="get" class="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-7 gap-3 text-sm">
   <input name="q" value="{{ q }}" placeholder="Search…" class="input md:col-span-2">
   <select name="status" class="input">
     <option value="">All statuses</option>
@@ -26,13 +26,19 @@
       <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
     {% endfor %}
   </select>
+  <select name="role" class="input">
+    <option value="">Any role</option>
+    {% for value, label in role_choices %}
+      <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
   <select name="sort" class="input">
     <option value="updated" {% if selected_sort == "updated" %}selected{% endif %}>Recently updated</option>
     <option value="due" {% if selected_sort == "due" %}selected{% endif %}>Due date</option>
     <option value="priority" {% if selected_sort == "priority" %}selected{% endif %}>Priority</option>
     <option value="title" {% if selected_sort == "title" %}selected{% endif %}>Title</option>
   </select>
-  <div class="md:col-span-6 flex items-center gap-4">
+  <div class="md:col-span-7 flex items-center gap-4">
     <label class="text-gray-700"><input type="checkbox" name="show_completed" value="1"
       {% if show_completed %}checked{% endif %}> Show completed</label>
     <button type="submit" class="btn-secondary ml-auto">Apply</button>
