@@ -43,6 +43,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.accounts.middleware.TimezoneMiddleware",
+    "apps.accounts.middleware.BackupMiddleware",
     "apps.projects.middleware.RecurringGenerationMiddleware",
     "apps.projects.middleware.ActorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

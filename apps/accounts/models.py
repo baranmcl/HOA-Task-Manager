@@ -31,3 +31,28 @@ class UserProfile(models.Model):
         if self.roster_person_id:
             return self.roster_person.name
         return self.user.email or self.user.username
+
+
+class BackupLog(models.Model):
+    """One row per day the database backup ran (or attempted to run).
+
+    The unique `run_date` makes the 'first request wins' race in
+    BackupMiddleware safe — a second concurrent request raises IntegrityError
+    on insert and is treated as a no-op. The remaining fields are
+    observability: when did it start/finish, how big was the uploaded file,
+    what's its R2 key, and was there an error.
+    """
+
+    run_date = models.DateField(unique=True)
+    started_at = models.DateTimeField(auto_now_add=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    bytes_uploaded = models.PositiveIntegerField(null=True, blank=True)
+    object_key = models.CharField(max_length=200, blank=True)
+    error = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-run_date"]
+
+    def __str__(self):
+        status = "ok" if not self.error else "error"
+        return f"Backup {self.run_date} ({status})"
