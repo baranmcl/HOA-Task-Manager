@@ -29,4 +29,28 @@
     <a href="{% url 'projects:category_list' %}" class="btn-secondary">Manage project categories</a>
   </div>
 </div>
+
+<section class="bg-white rounded-lg shadow p-6 max-w-md mt-6">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Last backup</h2>
+  {% if latest_backup %}
+    <dl class="space-y-2 text-sm">
+      <div class="flex"><dt class="w-32 text-gray-500">Date</dt>
+        <dd class="text-gray-900">{{ latest_backup.run_date }}</dd></div>
+      <div class="flex"><dt class="w-32 text-gray-500">Finished</dt>
+        <dd class="text-gray-900">
+          {% if latest_backup.finished_at %}{{ latest_backup.finished_at|date:"M j · g:i A" }}{% else %}—{% endif %}
+        </dd></div>
+      <div class="flex"><dt class="w-32 text-gray-500">Size</dt>
+        <dd class="text-gray-900">
+          {% if latest_backup.bytes_uploaded %}{{ latest_backup.bytes_uploaded }} bytes{% else %}—{% endif %}
+        </dd></div>
+      <div class="flex"><dt class="w-32 text-gray-500">Status</dt>
+        <dd class="{% if latest_backup.error %}text-red-700{% else %}text-green-700{% endif %}">
+          {% if latest_backup.error %}{{ latest_backup.error }}{% else %}OK{% endif %}
+        </dd></div>
+    </dl>
+  {% else %}
+    <p class="text-gray-400 text-sm">No backups yet — the first one will run on tomorrow's first web request.</p>
+  {% endif %}
+</section>
 {% endblock %}
