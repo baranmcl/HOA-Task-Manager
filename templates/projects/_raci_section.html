@@ -14,7 +14,7 @@
       <option value="">Select person…</option>
       {% for p in available_people %}<option value="{{ p.pk }}">{{ p.name }}</option>{% endfor %}
     </select>
-    <select name="role" class="input">
+    <select name="role" class="input w-40 shrink-0">
       {% for value, label in raci_role_choices %}
         <option value="{{ value }}">{{ label }}</option>
       {% endfor %}

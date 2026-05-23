@@ -24,9 +24,11 @@ def detail(request, pk):
         pk=pk,
     )
     activity = ActivityLog.objects.filter(project=project).select_related("actor")[:30]
-    available_people = RosterPerson.active.exclude(
-        raci_assignments__project=project,
-    ).distinct()
+    # All active roster people. The unique constraint on
+    # (project, person, role) and the IntegrityError catch in raci_add
+    # prevent true duplicates — letting the same person appear here
+    # enables assigning them to multiple roles on the same project.
+    available_people = RosterPerson.active.all()
     return render(
         request,
         "projects/detail.html",
