@@ -78,3 +78,45 @@ def test_list_renders_tag_pills_for_each_tag(auth_client, user, category):
     content = response.content.decode()
     assert "#concrete" in content
     assert "#sprinklers" in content
+
+
+@pytest.mark.django_db
+def test_tag_filter_returns_only_matching(auth_client, user, category):
+    from apps.projects.models import Tag
+    concrete = Tag.get_or_create_from_input("concrete")
+    Tag.get_or_create_from_input("sprinklers")
+    p1 = Project.objects.create(title="Has concrete", category=category, created_by=user)
+    p1.tags.add(concrete)
+    Project.objects.create(title="No tags", category=category, created_by=user)
+    response = auth_client.get(reverse("projects:list") + f"?tag={concrete.slug}")
+    titles = [p.title for p in response.context["projects"]]
+    assert titles == ["Has concrete"]
+
+
+@pytest.mark.django_db
+def test_tag_filter_unknown_slug_returns_empty(auth_client, user, category):
+    Project.objects.create(title="Anything", category=category, created_by=user)
+    response = auth_client.get(reverse("projects:list") + "?tag=does-not-exist")
+    titles = [p.title for p in response.context["projects"]]
+    assert titles == []
+
+
+@pytest.mark.django_db
+def test_tag_filter_composes_with_status(auth_client, user, category):
+    from apps.projects.models import Tag
+    audit = Tag.get_or_create_from_input("audit")
+    p1 = Project.objects.create(
+        title="Audit, in progress", category=category, created_by=user,
+        status="in_progress",
+    )
+    p1.tags.add(audit)
+    p2 = Project.objects.create(
+        title="Audit, not started", category=category, created_by=user,
+        status="not_started",
+    )
+    p2.tags.add(audit)
+    response = auth_client.get(
+        reverse("projects:list") + f"?tag={audit.slug}&status=in_progress"
+    )
+    titles = [p.title for p in response.context["projects"]]
+    assert titles == ["Audit, in progress"]
