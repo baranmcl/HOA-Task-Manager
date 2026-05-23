@@ -142,7 +142,7 @@ def test_recurring_panel_includes_not_started_instances(auth_client, user, categ
         recurrence_rule="monthly",
         next_due_date=today + dt.timedelta(days=30),
     )
-    instance = Project.objects.create(
+    Project.objects.create(
         title="Monthly review — May 2026", category=category, created_by=user,
         is_recurring_template=False,
         status=ProjectStatus.NOT_STARTED,
