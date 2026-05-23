@@ -110,6 +110,32 @@ def test_activity_feed_scoped_to_filtered_person(
 
 
 @pytest.mark.django_db
+def test_dashboard_renders_activity_in_user_timezone(auth_client, user, category):
+    """Set the user's timezone to Chicago and verify an activity timestamp
+    renders in Chicago time, not UTC. Catches the previously-observed bug
+    where the activity feed showed '5:12 AM' (UTC) instead of '12:12 AM' (CDT).
+    """
+    user.profile.timezone = "America/Chicago"
+    user.profile.save()
+
+    project = Project.objects.create(
+        title="TZ test", category=category, created_by=user,
+        status=ProjectStatus.IN_PROGRESS,
+    )
+    # 2026-06-15 17:30:00 UTC = 12:30 PM CDT (UTC-5 during daylight saving)
+    fixed_utc = dt.datetime(2026, 6, 15, 17, 30, 0, tzinfo=dt.UTC)
+    log = ActivityLog.objects.create(actor=user, project=project, verb="touched")
+    ActivityLog.objects.filter(pk=log.pk).update(created_at=fixed_utc)
+
+    response = auth_client.get(reverse("home") + "?person=all")
+    content = response.content.decode()
+
+    # The activity feed should show Chicago time, not the raw UTC hour.
+    assert "12:30 PM" in content
+    assert "5:30 PM" not in content
+
+
+@pytest.mark.django_db
 def test_activity_feed_renders_linked_roster_person_name(
     auth_client, user, category, mike,
 ):
