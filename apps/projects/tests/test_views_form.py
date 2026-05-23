@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from apps.projects.models import Project, RACIAssignment, RACIRole
+from apps.projects.models import Project, RACIRole
 from apps.roster.models import RosterPerson
 
 
