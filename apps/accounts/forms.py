@@ -2,6 +2,8 @@ import zoneinfo
 
 from django import forms
 
+from apps.roster.models import RosterPerson
+
 from .models import UserProfile
 
 
@@ -14,7 +16,15 @@ class ProfileForm(forms.ModelForm):
         choices=_timezone_choices,
         widget=forms.Select(attrs={"class": "input"}),
     )
+    roster_person = forms.ModelChoiceField(
+        queryset=RosterPerson.active.all(),
+        required=False,
+        widget=forms.Select(attrs={"class": "input"}),
+        label="Linked roster person",
+        help_text="Used to default the dashboard to your own tasks.",
+        empty_label="— not linked —",
+    )
 
     class Meta:
         model = UserProfile
-        fields = ["timezone"]
+        fields = ["timezone", "roster_person"]

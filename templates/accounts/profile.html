@@ -12,8 +12,13 @@
   <form method="post" class="space-y-4">
     {% csrf_token %}
     <div>
-      <label for="id_timezone" class="label">Change timezone</label>
+      <label for="{{ form.timezone.id_for_label }}" class="label">Change timezone</label>
       {{ form.timezone }}
+    </div>
+    <div>
+      <label for="{{ form.roster_person.id_for_label }}" class="label">{{ form.roster_person.label }}</label>
+      {{ form.roster_person }}
+      {% if form.roster_person.help_text %}<p class="text-xs text-gray-500 mt-1">{{ form.roster_person.help_text }}</p>{% endif %}
     </div>
     <button type="submit" class="btn-primary">Save</button>
   </form>
