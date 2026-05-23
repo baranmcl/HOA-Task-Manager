@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Dashboard — HOA Task Manager{% endblock %}
 {% block content %}
-<h1 class="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <h1 class="text-2xl font-semibold text-gray-900">Dashboard</h1>
+  <form method="get" class="flex items-center gap-2 text-sm">
+    <label for="dashboard-person" class="text-gray-700">Showing tasks for:</label>
+    <select id="dashboard-person" name="person" class="input" onchange="this.form.submit()">
+      <option value="all" {% if selected_person == "all" %}selected{% endif %}>All people</option>
+      {% for p in people %}
+        <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+{% if unlinked_user_banner %}
+<div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 mb-6 text-sm">
+  Link your account to a roster person in
+  <a href="{% url 'accounts:profile' %}" class="underline font-medium">Account</a>
+  to see only your tasks.
+</div>
+{% endif %}
 
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
   <div class="bg-white rounded-lg shadow p-4">

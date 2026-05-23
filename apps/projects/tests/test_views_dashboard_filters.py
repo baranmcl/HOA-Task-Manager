@@ -107,3 +107,27 @@ def test_activity_feed_scoped_to_filtered_person(
     project_titles = [log.project.title for log in response.context["activity"]]
     assert "Mike's task" in project_titles
     assert "Laurel's task" not in project_titles
+
+
+@pytest.mark.django_db
+def test_unlinked_banner_renders_for_unlinked_user(auth_client):
+    response = auth_client.get(reverse("home"))
+    content = response.content.decode()
+    assert "Link your account to a roster person" in content
+
+
+@pytest.mark.django_db
+def test_unlinked_banner_does_not_render_for_linked_user(linked_client):
+    response = linked_client.get(reverse("home"))
+    content = response.content.decode()
+    assert "Link your account to a roster person" not in content
+
+
+@pytest.mark.django_db
+def test_person_dropdown_renders_options(linked_client, projects_per_person, mike, laurel):
+    response = linked_client.get(reverse("home"))
+    content = response.content.decode()
+    # The dropdown options include both active people and an "All people" option.
+    assert "All people" in content
+    assert ">Mike Smith" in content or "Mike Smith</option>" in content
+    assert ">Laurel Baran" in content or "Laurel Baran</option>" in content
