@@ -16,6 +16,7 @@ SORT_CHOICES = {
 def list_view(request):
     qs = Project.instances.select_related("category").prefetch_related(
         "raci_assignments__person",
+        "tags",
     ).annotate(
         note_count=Count("notes", distinct=True),
         attachment_count=Count("attachments", distinct=True),

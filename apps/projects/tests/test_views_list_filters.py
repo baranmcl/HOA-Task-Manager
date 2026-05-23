@@ -66,3 +66,15 @@ def test_invalid_role_falls_back_to_no_role_filter(
     response = auth_client.get(reverse("projects:list") + "?role=bogus")
     titles = [p.title for p in response.context["projects"]]
     assert set(titles) == {"P1", "P2"}
+
+
+@pytest.mark.django_db
+def test_list_renders_tag_pills_for_each_tag(auth_client, user, category):
+    from apps.projects.models import Tag
+    p = Project.objects.create(title="Tagged", category=category, created_by=user)
+    p.tags.add(Tag.get_or_create_from_input("concrete"))
+    p.tags.add(Tag.get_or_create_from_input("sprinklers"))
+    response = auth_client.get(reverse("projects:list"))
+    content = response.content.decode()
+    assert "#concrete" in content
+    assert "#sprinklers" in content

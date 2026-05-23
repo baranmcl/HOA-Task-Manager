@@ -12,6 +12,11 @@
     <div class="text-xs text-gray-500">
       {{ p.note_count }} note{{ p.note_count|pluralize }} · {{ p.attachment_count }} file{{ p.attachment_count|pluralize }}
     </div>
+    {% if p.tags.all %}
+      <div class="mt-1 flex flex-wrap gap-1">
+        {% for tag in p.tags.all %}<span class="pill bg-gray-100 text-gray-700 text-xs">#{{ tag.name }}</span>{% endfor %}
+      </div>
+    {% endif %}
   </td>
   <td class="px-3 py-3"><span class="pill bg-gray-100 text-gray-700">{{ p.category.name }}</span></td>
   <td class="px-3 py-3">
