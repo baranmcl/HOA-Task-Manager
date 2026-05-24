@@ -1,6 +1,9 @@
 {% load humanize %}
 <tr>
   <td class="px-2 py-3">
+    <input type="checkbox" name="ids" value="{{ p.pk }}" aria-label="Select {{ p.title }}">
+  </td>
+  <td class="px-2 py-3">
     <span class="inline-block w-2 h-2 rounded-full
       {% if p.priority == 'high' %}bg-red-500
       {% elif p.priority == 'medium' %}bg-amber-500

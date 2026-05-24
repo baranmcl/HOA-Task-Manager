@@ -59,24 +59,73 @@
 {% endif %}
 
 {% if projects %}
-<div class="bg-white rounded-lg shadow overflow-hidden">
-  <table class="min-w-full divide-y divide-gray-200 text-sm">
-    <thead class="bg-gray-50 text-xs uppercase text-gray-500">
-      <tr>
-        <th class="w-1 px-2 py-2"></th>
-        <th class="px-3 py-2 text-left">Title</th>
-        <th class="px-3 py-2 text-left">Category</th>
-        <th class="px-3 py-2 text-left">Status</th>
-        <th class="px-3 py-2 text-left">RACI</th>
-        <th class="px-3 py-2 text-left">Due</th>
-        <th class="px-3 py-2 text-left">Budget / Actual</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      {% for p in projects %}{% include "projects/_list_row.html" %}{% endfor %}
-    </tbody>
-  </table>
-</div>
+<form method="post" action="{% url 'projects:bulk_delete' %}" id="bulk-form">
+  {% csrf_token %}
+  <input type="hidden" name="confirm" id="confirm-word" value="">
+  <div class="flex items-center mb-2">
+    <button type="button" id="bulk-delete-btn" class="btn-secondary text-sm" disabled>
+      Delete selected
+    </button>
+    <span id="bulk-count" class="text-xs text-gray-500 ml-2"></span>
+  </div>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+        <tr>
+          <th class="w-6 px-2 py-2">
+            <input type="checkbox" id="select-all" aria-label="Select all projects">
+          </th>
+          <th class="w-1 px-2 py-2"></th>
+          <th class="px-3 py-2 text-left">Title</th>
+          <th class="px-3 py-2 text-left">Category</th>
+          <th class="px-3 py-2 text-left">Status</th>
+          <th class="px-3 py-2 text-left">RACI</th>
+          <th class="px-3 py-2 text-left">Due</th>
+          <th class="px-3 py-2 text-left">Budget / Actual</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        {% for p in projects %}{% include "projects/_list_row.html" %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</form>
+<script>
+(function() {
+  const form = document.getElementById("bulk-form");
+  const deleteBtn = document.getElementById("bulk-delete-btn");
+  const countLabel = document.getElementById("bulk-count");
+  const selectAll = document.getElementById("select-all");
+  const checkboxes = () => form.querySelectorAll('input[type="checkbox"][name="ids"]');
+  const update = () => {
+    const checked = Array.from(checkboxes()).filter(cb => cb.checked);
+    deleteBtn.disabled = checked.length === 0;
+    countLabel.textContent = checked.length ? checked.length + " selected" : "";
+  };
+  selectAll.addEventListener("change", function() {
+    checkboxes().forEach(cb => { cb.checked = selectAll.checked; });
+    update();
+  });
+  form.addEventListener("change", function(e) {
+    if (e.target && e.target.name === "ids") update();
+  });
+  update();
+
+  deleteBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+    const count = Array.from(checkboxes()).filter(cb => cb.checked).length;
+    if (count === 0) return;
+    const typed = window.prompt(
+      "Delete " + count + " project(s)? This cannot be undone.\n" +
+      "Type the word \"delete\" to confirm:"
+    );
+    if (typed === "delete") {
+      document.getElementById("confirm-word").value = "delete";
+      form.submit();
+    }
+  });
+})();
+</script>
 {% else %}
 {% include "projects/_empty_state.html" %}
 {% endif %}
