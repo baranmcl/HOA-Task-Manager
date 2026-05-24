@@ -10,19 +10,17 @@ def resolve_person_filter(request):
     """Returns (person_id_or_None, show_unlinked_banner, selected_value).
 
     - person_id_or_None: the RosterPerson pk to filter on, or None for "show all".
-    - show_unlinked_banner: True only when the user has no roster_person link
-      AND did not explicitly choose `?person=all` or `?person=<id>` themselves.
+    - show_unlinked_banner: always False. The dashboard/calendar default to
+      "all people" regardless of whether the user has linked their roster
+      person, so there's no useful nudge to surface. Kept in the return
+      tuple so callers don't need to change their unpacking shape.
     - selected_value: the value to render in the dropdown — "all", a numeric
-      pk as a string, or "" if no explicit choice was made.
+      pk as a string. Defaults to "all" when nothing is explicitly chosen.
     """
     raw = request.GET.get("person")
-    linked = getattr(request.user.profile, "roster_person", None)
 
-    if raw == "all":
-        return None, False, "all"
     if raw and raw.isdigit():
         return int(raw), False, raw
-    # No explicit choice — auto-default to linked person if available.
-    if linked is not None:
-        return linked.pk, False, str(linked.pk)
-    return None, True, ""
+    # Everything else — "all", missing, empty, or invalid — falls through to
+    # the "show everyone" default.
+    return None, False, "all"

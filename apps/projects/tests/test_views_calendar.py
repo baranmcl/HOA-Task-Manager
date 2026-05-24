@@ -165,15 +165,21 @@ def linked_client(db, client, mike):
 
 
 @pytest.mark.django_db
-def test_calendar_unlinked_user_sees_banner(auth_client):
-    response = auth_client.get(reverse("projects:calendar"))
-    assert "Link your account to a roster person" in response.content.decode()
+def test_calendar_no_unlinked_banner(auth_client, linked_client):
+    """The 'Link your account…' banner was removed when the default changed
+    to 'All people' — it no longer serves a purpose on the calendar."""
+    for client in (auth_client, linked_client):
+        response = client.get(reverse("projects:calendar"))
+        assert "Link your account to a roster person" not in response.content.decode()
 
 
 @pytest.mark.django_db
-def test_calendar_linked_user_defaults_to_their_projects(
+def test_calendar_default_shows_all_projects(
     linked_client, user, category, mike, laurel,
 ):
+    """Calendar default is now 'All people' — even linked users see every
+    project's date chips on first load. They can scope to themselves via
+    the dropdown if desired."""
     p_mike = Project.objects.create(
         title="Mike project", category=category, created_by=user,
         projected_completion_date=dt.date(2026, 5, 10),
@@ -188,7 +194,7 @@ def test_calendar_linked_user_defaults_to_their_projects(
     response = linked_client.get(reverse("projects:calendar_at", args=[2026, 5]))
     content = response.content.decode()
     assert "Mike project" in content
-    assert "Laurel project" not in content
+    assert "Laurel project" in content
 
 
 @pytest.mark.django_db

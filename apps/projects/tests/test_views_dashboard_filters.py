@@ -61,25 +61,30 @@ def projects_per_person(db, user, category, mike, laurel):
 
 
 @pytest.mark.django_db
-def test_unlinked_user_sees_unlinked_banner_flag(auth_client, projects_per_person):
+def test_unlinked_user_default_shows_all(auth_client, projects_per_person):
+    """Dashboard now defaults to 'All people' regardless of link status —
+    so an unlinked user sees every project's stats, not zero."""
     response = auth_client.get(reverse("home"))
-    assert response.context["unlinked_user_banner"] is True
-    # And no filter applied: both projects' "In progress" count is 2.
+    assert response.context["unlinked_user_banner"] is False
     assert response.context["stats"]["in_progress"] == 2
 
 
 @pytest.mark.django_db
-def test_linked_user_defaults_to_their_person(linked_client, projects_per_person):
+def test_linked_user_default_shows_all(linked_client, projects_per_person):
+    """Linked users no longer auto-filter to themselves — default is 'All
+    people'. The user can pick themselves from the dropdown if they want."""
     response = linked_client.get(reverse("home"))
     assert response.context["unlinked_user_banner"] is False
-    # Filtered to Mike's project only.
-    assert response.context["stats"]["in_progress"] == 1
+    assert response.context["stats"]["in_progress"] == 2
     titles = [p.title for p in response.context["upcoming"]]
-    assert titles == ["Mike's task"]
+    assert "Mike's task" in titles
+    assert "Laurel's task" in titles
 
 
 @pytest.mark.django_db
-def test_explicit_all_overrides_default(linked_client, projects_per_person):
+def test_explicit_all_query_param_still_works(linked_client, projects_per_person):
+    """?person=all still resolves to 'no filter' for backwards
+    compatibility with any external links that include it."""
     response = linked_client.get(reverse("home") + "?person=all")
     assert response.context["stats"]["in_progress"] == 2
 
@@ -96,6 +101,8 @@ def test_explicit_other_person_filters_to_them(linked_client, projects_per_perso
 def test_activity_feed_scoped_to_filtered_person(
     linked_client, projects_per_person, user, mike,
 ):
+    """When the user explicitly picks a person in the dropdown, the activity
+    feed scopes to that person's projects."""
     p_mike, p_laurel = projects_per_person
     ActivityLog.objects.create(
         actor=user, project=p_mike, verb="changed status of",
@@ -103,7 +110,8 @@ def test_activity_feed_scoped_to_filtered_person(
     ActivityLog.objects.create(
         actor=user, project=p_laurel, verb="changed status of",
     )
-    response = linked_client.get(reverse("home"))
+    # Explicit filter to Mike (no longer the default — Mike must be picked).
+    response = linked_client.get(reverse("home") + f"?person={mike.pk}")
     project_titles = [log.project.title for log in response.context["activity"]]
     assert "Mike's task" in project_titles
     assert "Laurel's task" not in project_titles
@@ -159,17 +167,12 @@ def test_activity_feed_renders_linked_roster_person_name(
 
 
 @pytest.mark.django_db
-def test_unlinked_banner_renders_for_unlinked_user(auth_client):
-    response = auth_client.get(reverse("home"))
-    content = response.content.decode()
-    assert "Link your account to a roster person" in content
-
-
-@pytest.mark.django_db
-def test_unlinked_banner_does_not_render_for_linked_user(linked_client):
-    response = linked_client.get(reverse("home"))
-    content = response.content.decode()
-    assert "Link your account to a roster person" not in content
+def test_no_unlinked_banner_on_dashboard(auth_client, linked_client):
+    """The 'Link your account…' banner was removed when the default changed
+    to 'All people' — it no longer serves a purpose."""
+    for client in (auth_client, linked_client):
+        response = client.get(reverse("home"))
+        assert "Link your account to a roster person" not in response.content.decode()
 
 
 @pytest.mark.django_db
@@ -260,6 +263,8 @@ def test_recurring_panel_respects_person_filter(linked_client, user, category, m
     RACIAssignment.objects.create(
         project=laurels_instance, person=laurel, role=RACIRole.RESPONSIBLE,
     )
-    response = linked_client.get(reverse("home"))
+    # Explicit ?person=<mike.pk> filter — default is now "all", so Mike
+    # must be picked to scope the panel to his recurring instances only.
+    response = linked_client.get(reverse("home") + f"?person={mike.pk}")
     titles = [p.title for p in response.context["recurring_on_deck"]]
     assert titles == ["For Mike"]
