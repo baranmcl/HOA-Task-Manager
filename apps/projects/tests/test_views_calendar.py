@@ -210,3 +210,13 @@ def test_calendar_person_all_overrides_default(
     content = response.content.decode()
     assert "Mike project" in content
     assert "Laurel project" in content
+
+
+@pytest.mark.django_db
+def test_sidebar_includes_calendar_link(auth_client):
+    """Any logged-in page renders the sidebar; the Calendar link must
+    exist and point at projects:calendar."""
+    response = auth_client.get(reverse("home"))
+    content = response.content.decode()
+    assert ">Calendar<" in content
+    assert reverse("projects:calendar") in content
