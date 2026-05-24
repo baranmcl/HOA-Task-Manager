@@ -116,6 +116,14 @@ def test_import_no_file_shows_error(auth_client):
 
 
 @pytest.mark.django_db
+def test_sidebar_includes_import_link(auth_client):
+    response = auth_client.get(reverse("home"))
+    content = response.content.decode()
+    assert "Import projects" in content
+    assert reverse("projects:import_form") in content
+
+
+@pytest.mark.django_db
 def test_import_only_valid_rows_get_created_on_confirm(auth_client, category):
     csv_text = (
         "title,category\n"
