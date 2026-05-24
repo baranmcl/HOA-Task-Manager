@@ -17,6 +17,10 @@ urlpatterns = [
     path("calendar/", views.calendar_view, name="calendar"),
     path("calendar/<int:year>/<int:month>/", views.calendar_view, name="calendar_at"),
     path("search/", views.search_view, name="search"),
+    path("import/", views.import_form, name="import_form"),
+    path("import/confirm/", views.import_confirm, name="import_confirm"),
+    path("import/template/", views.import_template, name="import_template"),
+    path("bulk-delete/", views.bulk_delete, name="bulk_delete"),
 
     # --- HTMX / action endpoints (detail page) ---
     path("<int:pk>/inline/status/edit/", views.status_edit, name="inline_status_edit"),

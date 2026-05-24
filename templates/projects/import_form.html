@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Import projects — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-4">Import projects</h1>
+
+<p class="text-sm text-gray-700 mb-4">
+  Upload a CSV from Excel or Google Sheets to create projects in bulk.
+  You'll see a preview before anything is saved.
+</p>
+
+<div class="bg-blue-50 border border-blue-200 rounded p-3 text-sm mb-6">
+  <p class="mb-2"><strong>Required columns:</strong> <code>title</code>, <code>category</code></p>
+  <p class="mb-2"><strong>Optional:</strong> description, status, priority, projected_completion_date,
+     budget_amount, vendor_name, vendor_bid_amount, responsible</p>
+  <p><strong>Dates:</strong> YYYY-MM-DD or M/D/YYYY (Excel default both work).</p>
+  <p class="mt-2"><a class="text-blue-700 hover:underline" href="{% url 'projects:import_template' %}">Download template CSV</a></p>
+</div>
+
+{% if error %}
+  <div class="bg-red-50 border border-red-200 text-red-800 rounded p-3 mb-4 text-sm">
+    {{ error }}
+  </div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" class="bg-white rounded shadow p-5 max-w-xl">
+  {% csrf_token %}
+  <label class="block text-sm font-medium text-gray-700 mb-2" for="file">CSV file</label>
+  <input id="file" type="file" name="file" accept=".csv" class="block mb-4">
+  <button type="submit" class="btn-primary">Preview import</button>
+</form>
+{% endblock %}

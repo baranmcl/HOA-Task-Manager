@@ -3,11 +3,15 @@ from .approval import approval_edit as approval_edit
 from .attachment import attachment_delete as attachment_delete
 from .attachment import attachment_download as attachment_download
 from .attachment import attachment_upload as attachment_upload
+from .bulk import bulk_delete as bulk_delete
 from .calendar import calendar_view as calendar_view
 from .category import category_add as category_add
 from .category import category_delete as category_delete
 from .category import category_list as category_list
 from .category import category_rename as category_rename
+from .csv_import import import_confirm as import_confirm
+from .csv_import import import_form as import_form
+from .csv_import import import_template as import_template
 from .inline import budget_edit as budget_edit
 from .inline import budget_save as budget_save
 from .inline import budget_show as budget_show
