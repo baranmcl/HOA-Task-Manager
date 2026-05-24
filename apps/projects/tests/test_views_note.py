@@ -136,3 +136,67 @@ def test_note_delete_rejects_get(auth_client, project, user):
     response = auth_client.get(reverse("projects:note_delete", args=[note.pk]))
     assert response.status_code == 405
     assert UpdateNote.objects.filter(pk=note.pk).exists()
+
+
+@pytest.mark.django_db
+def test_note_pin_pins_an_unpinned_note(auth_client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    response = auth_client.post(reverse("projects:note_pin", args=[note.pk]))
+    assert response.status_code == 200
+    note.refresh_from_db()
+    assert note.is_pinned is True
+
+
+@pytest.mark.django_db
+def test_note_pin_unpins_when_already_pinned(auth_client, project, user):
+    note = UpdateNote.objects.create(
+        project=project, body="x", author=user, is_pinned=True,
+    )
+    response = auth_client.post(reverse("projects:note_pin", args=[note.pk]))
+    assert response.status_code == 200
+    note.refresh_from_db()
+    assert note.is_pinned is False
+
+
+@pytest.mark.django_db
+def test_pinning_a_new_note_unpins_the_previous_one(auth_client, project, user):
+    """Pinning Note B must atomically unpin Note A. The partial unique
+    constraint would otherwise raise IntegrityError."""
+    note_a = UpdateNote.objects.create(
+        project=project, body="A", author=user, is_pinned=True,
+    )
+    note_b = UpdateNote.objects.create(project=project, body="B", author=user)
+
+    response = auth_client.post(reverse("projects:note_pin", args=[note_b.pk]))
+    assert response.status_code == 200
+
+    note_a.refresh_from_db()
+    note_b.refresh_from_db()
+    assert note_a.is_pinned is False
+    assert note_b.is_pinned is True
+
+
+@pytest.mark.django_db
+def test_note_pin_does_not_bump_updated_at(auth_client, project, user):
+    """Pin/unpin is metadata, not content — it should not register as an edit."""
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    original_updated_at = note.updated_at
+
+    auth_client.post(reverse("projects:note_pin", args=[note.pk]))
+
+    note.refresh_from_db()
+    assert note.updated_at == original_updated_at
+
+
+@pytest.mark.django_db
+def test_note_pin_requires_login(client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    response = client.post(reverse("projects:note_pin", args=[note.pk]))
+    assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_note_pin_rejects_get(auth_client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    response = auth_client.get(reverse("projects:note_pin", args=[note.pk]))
+    assert response.status_code == 405

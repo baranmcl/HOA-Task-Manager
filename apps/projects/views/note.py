@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
@@ -62,4 +63,24 @@ def note_delete(request, pk):
     note = get_object_or_404(UpdateNote, pk=pk)
     project = note.project
     note.delete()
+    return _render_notes_list(request, project)
+
+
+@login_required
+@require_http_methods(["POST"])
+def note_pin(request, pk):
+    note = get_object_or_404(UpdateNote, pk=pk)
+    project = note.project
+    with transaction.atomic():
+        if note.is_pinned:
+            # Unpin via raw .update() to avoid bumping updated_at (which
+            # would falsely register the action as an edit).
+            UpdateNote.objects.filter(pk=note.pk).update(is_pinned=False)
+        else:
+            # Unpin any currently pinned note on this project first, so the
+            # partial unique constraint is never violated.
+            UpdateNote.objects.filter(
+                project=project, is_pinned=True,
+            ).update(is_pinned=False)
+            UpdateNote.objects.filter(pk=note.pk).update(is_pinned=True)
     return _render_notes_list(request, project)
