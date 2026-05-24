@@ -85,10 +85,18 @@ Recurring (e.g. "Monthly financial review"): create it once as a
 template, the system generates a fresh instance automatically every
 month with the same RACI and category preserved.
 
-### Step 6 — Use the calendar, reports, and bulk import
+### Step 6 — Use the board, calendar, reports, and bulk import
 
-Three more pages, all in the left sidebar:
+Four more pages, all in the left sidebar:
 
+- **Board** — a Kanban-style view: cards for every in-flight project,
+  arranged into columns by status (Not started / In progress / Delayed).
+  Drag a card from one column to another and the status updates
+  automatically — no need to open the project. If you drag into
+  Delayed, it prompts you for the reason. A "Show completed" checkbox
+  brings in a fourth column when you want to celebrate. The activity
+  log records every drag the same way it records any other change, so
+  the audit trail stays clean.
 - **Calendar** — a month grid showing every project on its due date.
   Click any pill to jump straight to the project. Switch months with
   Prev / Today / Next. Use the dropdown to filter to one person.
@@ -179,6 +187,8 @@ Spend 10 minutes:
   whose name is on the RACI.
 - Add a note from your own perspective ("met with vendor today, quote
   attached"). Attach a file if you have one handy.
+- Open the **Board** and drag one of your in-progress projects to a
+  different column. (You can always drag it back.)
 - Open the **Calendar** and look at where the next month's deadlines
   land.
 - Open **Reports**, click "Last quarter", and skim what we got done.
