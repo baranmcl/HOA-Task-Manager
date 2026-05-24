@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Board — HOA Task Manager{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <h1 class="text-2xl font-semibold text-gray-900">Board</h1>
+  <form method="get" class="flex items-center gap-3 text-sm flex-wrap">
+    <label class="flex items-center gap-2">
+      <span class="text-gray-700">Showing tasks for:</span>
+      <select name="person" class="input" onchange="this.form.submit()">
+        <option value="all" {% if selected_person == "all" %}selected{% endif %}>All people</option>
+        {% for p in people %}
+          <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label class="flex items-center gap-1 text-gray-700">
+      <input type="checkbox" name="show_completed" value="1"
+             {% if show_completed %}checked{% endif %}
+             onchange="this.form.submit()">
+      Show completed
+    </label>
+  </form>
+</div>
+
+<div class="flex gap-4 overflow-x-auto pb-4" id="board">
+  {% for col in columns %}
+    <div class="flex-1 min-w-[260px] bg-gray-50 rounded-lg border border-gray-200">
+      <div class="px-3 py-2 border-b border-gray-200 flex items-center justify-between">
+        <span class="text-sm font-semibold text-gray-700">{{ col.label }}</span>
+        <span class="text-xs text-gray-500">{{ col.cards|length }}</span>
+      </div>
+      <ul class="board-column p-2 space-y-2 min-h-[120px]"
+          data-status="{{ col.status }}"
+          aria-label="{{ col.label }} column">
+        {% for p in col.cards %}
+          <li class="board-card bg-white rounded shadow-sm border border-gray-200 p-3 cursor-grab"
+              data-pk="{{ p.pk }}" data-title="{{ p.title }}">
+            <div class="flex items-start gap-2 mb-1">
+              <span class="mt-1 inline-block w-2 h-2 rounded-full shrink-0
+                {% if p.priority == 'high' %}bg-red-500
+                {% elif p.priority == 'medium' %}bg-amber-500
+                {% else %}bg-gray-300{% endif %}"
+                title="Priority: {{ p.get_priority_display }}"></span>
+              <a href="{% url 'projects:detail' p.pk %}"
+                 class="text-sm font-medium text-blue-700 hover:underline leading-snug">
+                {{ p.title }}
+              </a>
+            </div>
+            <div class="text-xs text-gray-600 ml-4">
+              {% for a in p.raci_assignments.all %}
+                {% if a.role == "responsible" %}R: {{ a.person.name|truncatechars:24 }}{% endif %}
+              {% empty %}<span class="text-gray-400">No owner</span>{% endfor %}
+            </div>
+            <div class="text-xs ml-4 {% if p.is_overdue %}text-red-700 font-medium{% else %}text-gray-500{% endif %}">
+              {% if p.projected_completion_date %}Due {{ p.projected_completion_date|date:"M j" }}{% else %}No due date{% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>
+
+<p id="board-feedback" class="sr-only" aria-live="polite"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+(function() {
+  const csrftoken = document.cookie.split('; ').find(r => r.startsWith('csrftoken='))?.split('=')[1];
+  const feedback = document.getElementById("board-feedback");
+
+  function announce(msg) {
+    feedback.textContent = msg;
+  }
+
+  function saveStatus(pk, newStatus, delayReason, undo) {
+    const fd = new FormData();
+    fd.append("status", newStatus);
+    if (delayReason) fd.append("delay_reason", delayReason);
+    fetch("/projects/" + pk + "/inline/status/save/", {
+      method: "POST",
+      headers: { "X-CSRFToken": csrftoken },
+      body: fd,
+      credentials: "same-origin",
+    }).then(r => {
+      if (!r.ok) return r.text().then(t => { throw new Error(t || "Save failed"); });
+      announce("Saved.");
+    }).catch(err => {
+      alert("Could not save: " + err.message);
+      undo();
+    });
+  }
+
+  document.querySelectorAll(".board-column").forEach(col => {
+    new Sortable(col, {
+      group: "board",
+      animation: 150,
+      ghostClass: "opacity-40",
+      onEnd: function(evt) {
+        if (evt.from === evt.to) return;  // moved within the same column — no status change
+        const card = evt.item;
+        const fromCol = evt.from;
+        const fromIndex = evt.oldIndex;
+        const targetStatus = evt.to.dataset.status;
+        const pk = card.dataset.pk;
+        const title = card.dataset.title;
+
+        let delayReason = null;
+        if (targetStatus === "delayed") {
+          delayReason = window.prompt(
+            "Why is \"" + title + "\" delayed? (required)"
+          );
+          if (!delayReason || !delayReason.trim()) {
+            // User cancelled or left blank — snap back.
+            fromCol.insertBefore(card, fromCol.children[fromIndex] || null);
+            return;
+          }
+          delayReason = delayReason.trim();
+        }
+
+        const undo = () => {
+          fromCol.insertBefore(card, fromCol.children[fromIndex] || null);
+        };
+        saveStatus(pk, targetStatus, delayReason, undo);
+      },
+    });
+  });
+})();
+</script>
+{% endblock %}
