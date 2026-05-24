@@ -50,15 +50,17 @@ That's it. Takes 30 seconds, once.
 
 ### Step 3 — Use the dashboard
 
-Land on the dashboard. By default it shows **your** tasks:
+Land on the dashboard. By default it shows **everyone's** work — the
+full board picture — so you can see what's in flight across all of us
+at a glance:
 
 - **Overdue** card with the red count means "something needs attention now."
 - **Upcoming (14 days)** lists what's coming this week and next.
-- **In progress** shows what you're actively working on.
+- **In progress** shows what's actively being worked on.
 - **Done this month** is the satisfying number that proves we got things done.
 
-You can switch the "Showing tasks for" dropdown to see another board
-member's work, or **All people** to see everything.
+Use the "Showing tasks for" dropdown to narrow the view to a specific
+person — including yourself — when you want a focused list.
 
 ### Step 4 — Click into a project
 
@@ -82,6 +84,27 @@ One-off project: click **New project**, fill in the form.
 Recurring (e.g. "Monthly financial review"): create it once as a
 template, the system generates a fresh instance automatically every
 month with the same RACI and category preserved.
+
+### Step 6 — Use the calendar, reports, and bulk import
+
+Three more pages, all in the left sidebar:
+
+- **Calendar** — a month grid showing every project on its due date.
+  Click any pill to jump straight to the project. Switch months with
+  Prev / Today / Next. Use the dropdown to filter to one person.
+- **Reports** — a "completed projects" summary for any date window you
+  pick. Six preset buttons (This month, This quarter, This year, Last
+  month, Last quarter, Last year) prefill the dates with one click.
+  Shows headline numbers (count completed, total spent, over-budget
+  count, average days to complete) and a per-category breakdown. Useful
+  for board-meeting talking points like *"in Q1 we finished 12
+  projects, spent $14,200 in Landscaping, and went over budget on
+  two."*
+- **Import projects** — if you've got a spreadsheet of projects you
+  want to load all at once, you can. Download the template CSV, fill it
+  in, upload it. The app shows you a preview with valid rows in green
+  and rejected rows in red (with the reason) *before* anything gets
+  saved. Click Confirm to create them.
 
 ---
 
@@ -133,10 +156,12 @@ portable file we control. Try doing that with Asana.
 
 Honest list:
 
-- No email notifications yet. (Coming soon — daily digest of overdue
-  items.)
-- No calendar view. (Coming soon — visualize all due dates at once.)
-- No board votes / formal approval workflows yet.
+- No email notifications yet. (Daily digest of overdue items is the
+  most-likely next big addition.)
+- No self-serve signup — accounts are created by me for now. Password
+  reset by email is coming once the email backend is wired up.
+- No printable / PDF export of the reports page. (Easy to add once we
+  decide it's worth doing.)
 - No mobile app — but the web UI works on phones.
 
 These are decisions, not omissions. I'm holding off on bells and
@@ -154,12 +179,15 @@ Spend 10 minutes:
   whose name is on the RACI.
 - Add a note from your own perspective ("met with vendor today, quote
   attached"). Attach a file if you have one handy.
-- Toggle the dashboard's "Showing tasks for" dropdown to **All people**
-  and look at what's in flight across the board.
+- Open the **Calendar** and look at where the next month's deadlines
+  land.
+- Open **Reports**, click "Last quarter", and skim what we got done.
+- Toggle the dashboard's "Showing tasks for" dropdown to your own name
+  to see just your plate.
 
 Then tell me what's missing or annoying. The whole point of building
 this ourselves is that we can fix what bugs us.
 
 ---
 
-*Built by Baran, May 2026. Source: <github.com/baranmcl/HOA-Task-Manager>.*
+*Built by Baran, last updated May 2026. Source: <github.com/baranmcl/HOA-Task-Manager>.*
