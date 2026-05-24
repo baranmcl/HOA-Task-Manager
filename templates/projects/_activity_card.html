@@ -1,9 +1,6 @@
+{% load humanize %}
 <li class="text-sm text-gray-700">
-  <span class="text-gray-500">{{ log.created_at|date:"M j · g:i A" }}</span> —
+  <span class="text-gray-500" title="{{ log.created_at|date:'M j, Y · g:i A' }}">{{ log.created_at|naturaltime }}</span> —
   <strong>{{ log.actor.profile.display_name }}</strong> {{ log.verb }}
-  {% if log.before_value or log.after_value %}
-    <span class="text-xs text-gray-500">
-      {% if log.before_value %}({{ log.before_value }} → {{ log.after_value }}){% else %}({{ log.after_value }}){% endif %}
-    </span>
-  {% endif %}
+  {% if log.value_change %}<span class="text-xs text-gray-500">({{ log.value_change }})</span>{% endif %}
 </li>
