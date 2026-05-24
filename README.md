@@ -156,6 +156,6 @@ board manager who'd find this useful, open an issue and we can talk.
 
 ---
 
-*Built by Baran, 2026. No license file yet — assume "all rights
+*Built by McLean Baran, 2026. No license file yet — assume "all rights
 reserved" until one is added. Get in touch if you want to use this for
 your own HOA.*

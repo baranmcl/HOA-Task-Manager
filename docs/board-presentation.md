@@ -200,4 +200,4 @@ this ourselves is that we can fix what bugs us.
 
 ---
 
-*Built by Baran, last updated May 2026. Source: <github.com/baranmcl/HOA-Task-Manager>.*
+*Built by McLean Baran, last updated May 2026. Source: <github.com/baranmcl/HOA-Task-Manager>.*
