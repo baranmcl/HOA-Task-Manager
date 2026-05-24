@@ -44,7 +44,8 @@
           {% if category.project_count %}
             <span class="text-xs text-gray-400">in use by {{ category.project_count }} project{{ category.project_count|pluralize }}</span>
           {% else %}
-            <form method="post" action="{% url 'projects:category_delete' category.pk %}">
+            <form method="post" action="{% url 'projects:category_delete' category.pk %}"
+                  onsubmit="return confirm('Delete category &quot;{{ category.name|escapejs }}&quot;? This can\'t be undone.');">
               {% csrf_token %}
               <button type="submit" class="text-sm text-red-700 hover:underline">Delete</button>
             </form>

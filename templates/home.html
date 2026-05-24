@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load humanize %}
 {% block title %}Dashboard — HOA Task Manager{% endblock %}
 {% block content %}
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -49,7 +50,7 @@
         {% for p in overdue %}
         <li class="py-2 flex items-center justify-between text-sm">
           <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
-          <span class="text-red-700">{{ p.projected_completion_date }}</span>
+          <span class="text-red-700" title="{{ p.projected_completion_date }}">{{ p.projected_completion_date|naturalday }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -63,7 +64,7 @@
         {% for p in upcoming %}
         <li class="py-2 flex items-center justify-between text-sm">
           <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
-          <span class="text-gray-700">{{ p.projected_completion_date }}</span>
+          <span class="text-gray-700" title="{{ p.projected_completion_date }}">{{ p.projected_completion_date|naturalday }}</span>
         </li>
         {% endfor %}
       </ul>
@@ -81,7 +82,7 @@
           <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' p.pk %}">{{ p.title }}</a>
           <span class="text-xs text-gray-500 ml-2">from <em>{{ p.parent_template.title }}</em></span>
         </div>
-        <span class="text-gray-700">{{ p.projected_completion_date|default:"—" }}</span>
+        <span class="text-gray-700" title="{{ p.projected_completion_date }}">{% if p.projected_completion_date %}{{ p.projected_completion_date|naturalday }}{% else %}—{% endif %}</span>
       </li>
       {% endfor %}
     </ul>

@@ -34,3 +34,7 @@ Thumbs.db
 *.swp
 
 bin/tailwindcss*
+
+# Claude Code / superpowers session state — local tooling, not project artifacts
+.claude/
+.superpowers/
