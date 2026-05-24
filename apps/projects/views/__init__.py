@@ -43,4 +43,5 @@ from .recurring import recurring_create as recurring_create
 from .recurring import recurring_edit as recurring_edit
 from .recurring import recurring_list as recurring_list
 from .recurring import recurring_toggle as recurring_toggle
+from .report import report_view as report_view
 from .search import search_view as search_view
