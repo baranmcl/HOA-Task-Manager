@@ -166,3 +166,13 @@ def test_search_excludes_recurring_templates(auth_client, user, category):
 def test_search_requires_login(client):
     response = client.get(reverse("projects:search"))
     assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_sidebar_includes_search_input(auth_client):
+    """Any logged-in page renders the sidebar; the search input must
+    exist and submit to projects:search."""
+    response = auth_client.get(reverse("home"))
+    content = response.content.decode()
+    assert reverse("projects:search") in content
+    assert 'type="search"' in content
