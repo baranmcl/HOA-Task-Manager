@@ -12,6 +12,7 @@ urlpatterns = [
     ), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("profile/", views.profile, name="profile"),
+    path("backup/run/", views.backup_run_now, name="backup_run_now"),
     path("password/change/", auth_views.PasswordChangeView.as_view(
         success_url=reverse_lazy("accounts:password_change_done"),
     ), name="password_change"),

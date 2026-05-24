@@ -127,3 +127,59 @@ def test_profile_page_shows_no_backup_yet_when_none(client, monkeypatch):
     response = client.get(reverse("accounts:profile"))
     content = response.content.decode()
     assert "No backups yet" in content
+
+
+@pytest.mark.django_db(transaction=True)
+def test_backup_run_now_creates_log_row(client, settings):
+    """Posting the Back up now button calls the backup_database command,
+    which writes a BackupLog row. With R2 unconfigured (the test default),
+    the row records the skip — the button still 'works', just produces a
+    'skipped' status the user can see."""
+    settings.R2_ENDPOINT_URL = ""
+    settings.R2_ACCESS_KEY_ID = ""
+    settings.R2_SECRET_ACCESS_KEY = ""
+    settings.R2_BUCKET = ""
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="mona@example.com", email="mona@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    client.force_login(user)
+    response = client.post(reverse("accounts:backup_run_now"))
+    assert response.status_code == 302
+    assert response.url == reverse("accounts:profile")
+    log = BackupLog.objects.get(run_date=dt.date.today())
+    assert "not configured" in log.error.lower()
+
+
+@pytest.mark.django_db
+def test_backup_run_now_requires_login(client):
+    response = client.post(reverse("accounts:backup_run_now"))
+    assert response.status_code == 302
+    assert "/accounts/login/" in response.url
+
+
+@pytest.mark.django_db
+def test_backup_run_now_rejects_get(client):
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="nina@example.com", email="nina@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    client.force_login(user)
+    response = client.get(reverse("accounts:backup_run_now"))
+    assert response.status_code == 405
+
+
+@pytest.mark.django_db
+def test_profile_page_renders_backup_now_button(client):
+    User = get_user_model()
+    user = User.objects.create_user(
+        username="oscar@example.com", email="oscar@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    client.force_login(user)
+    response = client.get(reverse("accounts:profile"))
+    content = response.content.decode()
+    assert "Back up now" in content
+    assert reverse("accounts:backup_run_now") in content
