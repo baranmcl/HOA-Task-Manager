@@ -154,8 +154,12 @@ This is a single-user project built for one specific HOA's workflow.
 Forks welcome; PRs accepted on a case-by-case basis. If you're another
 board manager who'd find this useful, open an issue and we can talk.
 
+## License
+
+Licensed under the MIT License — see [LICENSE](LICENSE). You're free
+to fork, modify, and use this for your own HOA (commercial or not);
+keep the copyright notice and you're set.
+
 ---
 
-*Built by McLean Baran, 2026. No license file yet — assume "all rights
-reserved" until one is added. Get in touch if you want to use this for
-your own HOA.*
+*Built by McLean Baran, 2026.*
