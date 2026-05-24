@@ -1,5 +1,9 @@
 """Tests for the search view and its supporting template tag."""
+import pytest
 from django.template import Context, Template
+from django.urls import reverse
+
+from apps.projects.models import Project, UpdateNote
 
 
 def _render(template_str: str, context: dict) -> str:
@@ -60,3 +64,105 @@ def test_highlight_empty_query_returns_text_unchanged():
         {"text": "Met with vendor", "q": ""},
     )
     assert rendered == "Met with vendor"
+
+
+@pytest.mark.django_db
+def test_search_empty_query_renders_empty_state(auth_client):
+    response = auth_client.get(reverse("projects:search"))
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Search projects, notes, and descriptions" in content
+
+
+@pytest.mark.django_db
+def test_search_with_no_matches_shows_no_matches_message(auth_client):
+    response = auth_client.get(reverse("projects:search") + "?q=zzznope")
+    content = response.content.decode()
+    assert "No matches for" in content
+
+
+@pytest.mark.django_db
+def test_search_title_match(auth_client, user, category):
+    Project.objects.create(
+        title="Sprinkler upgrade", category=category, created_by=user,
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=sprinkler")
+    content = response.content.decode()
+    assert "Sprinkler upgrade" in content
+
+
+@pytest.mark.django_db
+def test_search_description_match(auth_client, user, category):
+    Project.objects.create(
+        title="Maintenance contract",
+        description="Quarterly review with the irrigation vendor.",
+        category=category, created_by=user,
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=irrigation")
+    content = response.content.decode()
+    assert "Maintenance contract" in content
+
+
+@pytest.mark.django_db
+def test_search_note_match(auth_client, user, category):
+    project = Project.objects.create(
+        title="Some project", category=category, created_by=user,
+    )
+    UpdateNote.objects.create(
+        project=project, author=user, body="Met with sprinkler vendor today.",
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=sprinkler")
+    content = response.content.decode()
+    # The project should be shown as a hit.
+    assert "Some project" in content
+    # The matching note body (or a snippet) should appear in the results.
+    assert "sprinkler" in content.lower()
+
+
+@pytest.mark.django_db
+def test_search_is_case_insensitive(auth_client, user, category):
+    Project.objects.create(
+        title="Sprinkler upgrade", category=category, created_by=user,
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=SPRINKLER")
+    content = response.content.decode()
+    assert "Sprinkler upgrade" in content
+
+
+@pytest.mark.django_db
+def test_search_project_matched_by_both_title_and_notes_appears_once(
+    auth_client, user, category,
+):
+    """A project whose title matches AND has matching notes should appear
+    once, classified by title (the stronger signal)."""
+    project = Project.objects.create(
+        title="Sprinkler upgrade", category=category, created_by=user,
+    )
+    UpdateNote.objects.create(
+        project=project, author=user, body="Sprinkler vendor meeting notes.",
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=sprinkler")
+    content = response.content.decode()
+    # Project title appears exactly once in the result-card heading.
+    # (It may appear other places in the page — e.g. inside the search input
+    # placeholder — so count occurrences in just the result cards. Simplest:
+    # ensure we got one project section, not two.)
+    assert content.count('Sprinkler upgrade</a>') == 1
+
+
+@pytest.mark.django_db
+def test_search_excludes_recurring_templates(auth_client, user, category):
+    """Project.instances excludes templates; search should never return them."""
+    Project.objects.create(
+        title="Monthly review template", category=category, created_by=user,
+        is_recurring_template=True,
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=monthly")
+    content = response.content.decode()
+    assert "Monthly review template" not in content
+
+
+@pytest.mark.django_db
+def test_search_requires_login(client):
+    response = client.get(reverse("projects:search"))
+    assert response.status_code == 302
