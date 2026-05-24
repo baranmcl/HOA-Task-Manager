@@ -2,7 +2,7 @@
   <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">RACI</h2>
   <ul id="raci-list-{{ project.pk }}" class="space-y-1 mb-3">
     {% for a in project.raci_assignments.all %}{% include "projects/_raci_row.html" %}{% empty %}
-      <li class="text-sm text-gray-400">No assignments yet.</li>
+      <li class="text-sm text-gray-400">No assignments yet — pick a person and role below.</li>
     {% endfor %}
   </ul>
   <form hx-post="{% url 'projects:raci_add' project.pk %}"

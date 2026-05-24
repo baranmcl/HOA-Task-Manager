@@ -109,7 +109,8 @@ def test_profile_page_shows_latest_backup(client):
     response = client.get(reverse("accounts:profile"))
     content = response.content.decode()
     assert "Last backup" in content
-    assert "12345 bytes" in content
+    # filesizeformat renders 12345 bytes as "12.1 KB" — assert the human form.
+    assert "12.1\xa0KB" in content
 
 
 @pytest.mark.django_db

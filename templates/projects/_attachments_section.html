@@ -2,7 +2,7 @@
   <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Attachments</h2>
   <ul id="attachments-list-{{ project.pk }}" class="space-y-2 mb-3">
     {% for f in project.attachments.all %}{% include "projects/_attachment_row.html" %}{% empty %}
-      <li class="text-sm text-gray-400">No files attached.</li>
+      <li class="text-sm text-gray-400">No files attached — use the form below to add one.</li>
     {% endfor %}
   </ul>
   <form hx-post="{% url 'projects:attachment_upload' project.pk %}"

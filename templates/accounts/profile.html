@@ -42,7 +42,7 @@
         </dd></div>
       <div class="flex"><dt class="w-32 text-gray-500">Size</dt>
         <dd class="text-gray-900">
-          {% if latest_backup.bytes_uploaded %}{{ latest_backup.bytes_uploaded }} bytes{% else %}—{% endif %}
+          {% if latest_backup.bytes_uploaded %}{{ latest_backup.bytes_uploaded|filesizeformat }}{% else %}—{% endif %}
         </dd></div>
       <div class="flex"><dt class="w-32 text-gray-500">Status</dt>
         <dd class="{% if latest_backup.error %}text-red-700{% else %}text-green-700{% endif %}">

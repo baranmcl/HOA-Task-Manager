@@ -10,7 +10,7 @@
   </form>
   <ul id="notes-list-{{ project.pk }}" class="space-y-3">
     {% for n in project.notes.all %}{% include "projects/_note_card.html" %}{% empty %}
-      <li class="text-sm text-gray-400">No notes yet.</li>
+      <li class="text-sm text-gray-400">No notes yet — add the first one above to start a record.</li>
     {% endfor %}
   </ul>
 </section>
