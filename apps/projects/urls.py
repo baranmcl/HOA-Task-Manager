@@ -14,6 +14,8 @@ urlpatterns = [
     path("categories/add/", views.category_add, name="category_add"),
     path("categories/<int:pk>/rename/", views.category_rename, name="category_rename"),
     path("categories/<int:pk>/delete/", views.category_delete, name="category_delete"),
+    path("calendar/", views.calendar_view, name="calendar"),
+    path("calendar/<int:year>/<int:month>/", views.calendar_view, name="calendar_at"),
 
     # --- HTMX / action endpoints (detail page) ---
     path("<int:pk>/inline/status/edit/", views.status_edit, name="inline_status_edit"),

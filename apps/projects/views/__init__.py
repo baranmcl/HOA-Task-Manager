@@ -3,6 +3,7 @@ from .approval import approval_edit as approval_edit
 from .attachment import attachment_delete as attachment_delete
 from .attachment import attachment_download as attachment_download
 from .attachment import attachment_upload as attachment_upload
+from .calendar import calendar_view as calendar_view
 from .category import category_add as category_add
 from .category import category_delete as category_delete
 from .category import category_list as category_list
