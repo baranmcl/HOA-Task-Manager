@@ -54,3 +54,12 @@ def note_save(request, pk):
         return HttpResponseBadRequest(", ".join(form.errors.get("body", [])))
     form.save()
     return _render_card(request, note)
+
+
+@login_required
+@require_http_methods(["POST"])
+def note_delete(request, pk):
+    note = get_object_or_404(UpdateNote, pk=pk)
+    project = note.project
+    note.delete()
+    return _render_notes_list(request, project)

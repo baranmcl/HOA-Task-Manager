@@ -35,6 +35,7 @@ urlpatterns = [
     path("note/<int:pk>/edit/", views.note_edit, name="note_edit"),
     path("note/<int:pk>/show/", views.note_show, name="note_show"),
     path("note/<int:pk>/save/", views.note_save, name="note_save"),
+    path("note/<int:pk>/delete/", views.note_delete, name="note_delete"),
     path("<int:pk>/attachment/upload/", views.attachment_upload, name="attachment_upload"),
     path("attachment/<int:pk>/delete/", views.attachment_delete, name="attachment_delete"),
     path("attachment/<int:pk>/download/", views.attachment_download, name="attachment_download"),

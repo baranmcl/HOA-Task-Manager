@@ -99,3 +99,40 @@ def test_note_save_requires_login(client, project, user):
         {"body": "new"},
     )
     assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_note_delete_removes_the_row(auth_client, project, user):
+    note = UpdateNote.objects.create(project=project, body="Goodbye", author=user)
+    response = auth_client.post(reverse("projects:note_delete", args=[note.pk]))
+    assert response.status_code == 200
+    assert not UpdateNote.objects.filter(pk=note.pk).exists()
+
+
+@pytest.mark.django_db
+def test_note_delete_returns_rebuilt_notes_list(auth_client, project, user):
+    UpdateNote.objects.create(project=project, body="Keep me", author=user)
+    note_to_delete = UpdateNote.objects.create(
+        project=project, body="Delete me", author=user,
+    )
+    response = auth_client.post(
+        reverse("projects:note_delete", args=[note_to_delete.pk]),
+    )
+    content = response.content.decode()
+    assert "Keep me" in content
+    assert "Delete me" not in content
+
+
+@pytest.mark.django_db
+def test_note_delete_requires_login(client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    response = client.post(reverse("projects:note_delete", args=[note.pk]))
+    assert response.status_code == 302
+
+
+@pytest.mark.django_db
+def test_note_delete_rejects_get(auth_client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    response = auth_client.get(reverse("projects:note_delete", args=[note.pk]))
+    assert response.status_code == 405
+    assert UpdateNote.objects.filter(pk=note.pk).exists()

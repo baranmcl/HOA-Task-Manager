@@ -4,6 +4,10 @@
     <button class="text-blue-700 hover:underline"
             hx-get="{% url 'projects:note_edit' n.pk %}"
             hx-target="closest li" hx-swap="outerHTML">Edit</button>
+    <button class="text-red-700 hover:underline"
+            hx-post="{% url 'projects:note_delete' n.pk %}"
+            hx-target="#notes-list-{{ project.pk }}" hx-swap="outerHTML"
+            hx-confirm="Delete this note? This can't be undone.">Delete</button>
   </div>
   <div class="prose prose-sm text-gray-800">{{ n.rendered_html|safe }}</div>
 </li>
