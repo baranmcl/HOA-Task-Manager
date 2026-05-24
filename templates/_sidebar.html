@@ -2,6 +2,7 @@
   <div class="text-lg font-semibold text-gray-900 mb-4">HOA Tasks</div>
   <form method="get" action="{% url 'projects:search' %}" class="mb-4">
     <input type="search" name="q" placeholder="🔎 Search…"
+           aria-label="Search projects and notes"
            class="w-full text-sm rounded border border-gray-300 px-2 py-1">
   </form>
   <nav class="space-y-1 text-sm">

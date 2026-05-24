@@ -163,6 +163,28 @@ def test_search_excludes_recurring_templates(auth_client, user, category):
 
 
 @pytest.mark.django_db
+def test_search_excludes_recurring_templates_via_note_match(
+    auth_client, user, category,
+):
+    """Notes attached to a recurring template must NOT pull the template
+    into search results. Step-3 of the search guards this explicitly with
+    project__is_recurring_template=False so the template-exclusion invariant
+    holds across all three match tiers.
+    """
+    template = Project.objects.create(
+        title="Quarterly template", category=category, created_by=user,
+        is_recurring_template=True,
+    )
+    UpdateNote.objects.create(
+        project=template, author=user,
+        body="This note mentions sprinklers but lives on a template.",
+    )
+    response = auth_client.get(reverse("projects:search") + "?q=sprinklers")
+    content = response.content.decode()
+    assert "Quarterly template" not in content
+
+
+@pytest.mark.django_db
 def test_search_requires_login(client):
     response = client.get(reverse("projects:search"))
     assert response.status_code == 302

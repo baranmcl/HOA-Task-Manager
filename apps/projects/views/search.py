@@ -29,9 +29,12 @@ def search_view(request):
     desc_ids = {p.pk for p in desc_hits}
 
     # Step 3 — notes whose body matches (excluding projects already returned).
+    # The is_recurring_template=False guard mirrors what Project.instances
+    # gives steps 1 and 2 — without it, a note attached to a recurring
+    # template would leak the template into search results.
     note_hits = list(
         UpdateNote.objects.select_related("project__category")
-        .filter(body__icontains=q)
+        .filter(body__icontains=q, project__is_recurring_template=False)
         .exclude(project_id__in=title_ids | desc_ids)
         .order_by("-updated_at"),
     )
