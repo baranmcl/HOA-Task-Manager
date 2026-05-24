@@ -1,0 +1,14 @@
+<li class="border-l-2 border-gray-200 pl-3" id="note-card-{{ n.pk }}">
+  <form hx-post="{% url 'projects:note_save' n.pk %}"
+        hx-target="closest li" hx-swap="outerHTML"
+        class="space-y-2">
+    {% csrf_token %}
+    <textarea name="body" rows="3" class="input" required>{{ n.body }}</textarea>
+    <div class="flex gap-2">
+      <button type="submit" class="btn-primary text-xs">Save</button>
+      <button type="button" class="btn-secondary text-xs"
+              hx-get="{% url 'projects:note_show' n.pk %}"
+              hx-target="closest li" hx-swap="outerHTML">Cancel</button>
+    </div>
+  </form>
+</li>
