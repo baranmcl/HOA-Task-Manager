@@ -1,5 +1,10 @@
 <aside class="w-56 shrink-0 bg-white border-r border-gray-200 px-4 py-6 hidden md:block">
-  <div class="text-lg font-semibold text-gray-900 mb-6">HOA Tasks</div>
+  <div class="text-lg font-semibold text-gray-900 mb-4">HOA Tasks</div>
+  <form method="get" action="{% url 'projects:search' %}" class="mb-4">
+    <input type="search" name="q" placeholder="🔎 Search…"
+           aria-label="Search projects and notes"
+           class="w-full text-sm rounded border border-gray-300 px-2 py-1">
+  </form>
   <nav class="space-y-1 text-sm">
     <a href="{% url 'home' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Dashboard</a>
     <a href="{% url 'projects:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Projects</a>

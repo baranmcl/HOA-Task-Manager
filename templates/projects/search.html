@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load search_extras %}
+{% block title %}Search — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-2">Search</h1>
+
+{% if q %}
+  <p class="text-sm text-gray-500 mb-6">Results for "{{ q }}"</p>
+{% else %}
+  <p class="text-sm text-gray-500 mb-6">Search projects, notes, and descriptions.</p>
+{% endif %}
+
+<form method="get" action="{% url 'projects:search' %}" class="mb-6">
+  <input type="search" name="q" value="{{ q }}" autofocus
+         placeholder="Search…"
+         class="input max-w-md">
+</form>
+
+{% if q and not results %}
+  <p class="text-gray-400 text-sm">No matches for "{{ q }}".</p>
+{% endif %}
+
+{% if results %}
+<div class="space-y-4">
+  {% for r in results %}
+    <div class="bg-white rounded-lg shadow p-4">
+      <div class="flex items-center gap-2 mb-1 flex-wrap">
+        <a href="{% url 'projects:detail' r.project.pk %}"
+           class="text-blue-700 font-medium hover:underline">{{ r.project.title }}</a>
+        <span class="pill bg-gray-100 text-gray-700">{{ r.project.category.name }}</span>
+        <span class="pill
+          {% if r.project.status == 'completed' %}bg-green-100 text-green-800
+          {% elif r.project.status == 'delayed' %}bg-red-100 text-red-800
+          {% elif r.project.status == 'in_progress' %}bg-blue-100 text-blue-800
+          {% else %}bg-gray-100 text-gray-700{% endif %}">{{ r.project.get_status_display }}</span>
+        <span class="text-xs text-gray-400 ml-auto">matched in {{ r.match_reason }}</span>
+      </div>
+      {% if r.match_reason == 'description' and r.project.description %}
+        <div class="text-sm text-gray-700 mt-2">{{ r.project.description|truncatechars:300|highlight:q }}</div>
+      {% endif %}
+      {% if r.match_reason == 'notes' %}
+        <ul class="mt-2 space-y-2">
+          {% for n in r.matched_notes %}
+            <li class="text-sm text-gray-700 border-l-2 border-gray-200 pl-3">
+              <div class="text-xs text-gray-500 mb-1">{{ n.created_at|date:"M j, Y" }}</div>
+              {{ n.body|truncatechars:300|highlight:q }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

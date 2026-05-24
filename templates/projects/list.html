@@ -51,6 +51,13 @@
   </div>
 </form>
 
+{% if due_filter %}
+  <div class="mb-3 text-sm">
+    <span class="pill bg-blue-100 text-blue-800">Due: {{ due_filter|date:"M j, Y" }}</span>
+    <a href="?" class="text-blue-600 hover:underline ml-2">clear</a>
+  </div>
+{% endif %}
+
 {% if projects %}
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <table class="min-w-full divide-y divide-gray-200 text-sm">
