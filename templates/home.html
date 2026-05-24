@@ -96,11 +96,12 @@
   <ul class="space-y-2 text-sm">
     {% for log in activity %}
       <li>
-        <span class="text-gray-500">{{ log.created_at|date:"M j · g:i A" }}</span> —
+        <span class="text-gray-500" title="{{ log.created_at|date:'M j, Y · g:i A' }}">{{ log.created_at|naturaltime }}</span> —
         <strong>{{ log.actor.profile.display_name }}</strong> {{ log.verb }}
         {% if log.project %}on <a class="text-blue-700 hover:underline" href="{% url 'projects:detail' log.project.pk %}">{{ log.project.title }}</a>{% endif %}
+        {% if log.value_change %}<span class="text-xs text-gray-500">({{ log.value_change }})</span>{% endif %}
       </li>
-    {% empty %}<li class="text-gray-400">No activity yet.</li>{% endfor %}
+    {% empty %}<li class="text-gray-400">No activity yet — start by creating or updating a project.</li>{% endfor %}
   </ul>
 </section>
 {% endblock %}
