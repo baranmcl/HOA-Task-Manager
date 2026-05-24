@@ -52,5 +52,10 @@
   {% else %}
     <p class="text-gray-400 text-sm">No backups yet — the first one will run on tomorrow's first web request.</p>
   {% endif %}
+
+  <form method="post" action="{% url 'accounts:backup_run_now' %}" class="mt-4">
+    {% csrf_token %}
+    <button type="submit" class="btn-secondary text-sm">Back up now</button>
+  </form>
 </section>
 {% endblock %}
