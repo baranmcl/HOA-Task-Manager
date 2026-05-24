@@ -1,7 +1,7 @@
 <li class="{% if n.is_pinned %}border-l-2 border-amber-300{% else %}border-l-2 border-gray-200{% endif %} pl-3" id="note-card-{{ n.pk }}">
   <div class="text-xs text-gray-500 mb-1 flex items-center gap-2">
     {% if n.is_pinned %}<span title="Pinned">📌</span>{% endif %}
-    <span>{{ n.created_at|date:"M j, Y · g:i A" }} · {{ n.author.profile.display_name }}</span>
+    <span>{{ n.created_at|date:"M j, Y · g:i A" }} · {{ n.author.profile.display_name }}{% if n.is_edited %} <span class="italic text-gray-400">(edited)</span>{% endif %}</span>
     <button class="text-blue-700 hover:underline"
             hx-get="{% url 'projects:note_edit' n.pk %}"
             hx-target="closest li" hx-swap="outerHTML">Edit</button>

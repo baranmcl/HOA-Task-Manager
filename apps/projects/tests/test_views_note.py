@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 from django.urls import reverse
 
@@ -200,3 +202,21 @@ def test_note_pin_rejects_get(auth_client, project, user):
     note = UpdateNote.objects.create(project=project, body="x", author=user)
     response = auth_client.get(reverse("projects:note_pin", args=[note.pk]))
     assert response.status_code == 405
+
+
+@pytest.mark.django_db
+def test_edited_indicator_absent_on_fresh_note(auth_client, project, user):
+    UpdateNote.objects.create(project=project, body="x", author=user)
+    response = auth_client.get(reverse("projects:detail", args=[project.pk]))
+    assert "(edited)" not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_edited_indicator_present_after_edit(auth_client, project, user):
+    note = UpdateNote.objects.create(project=project, body="x", author=user)
+    # Bump updated_at to 5 seconds after created_at so `is_edited` is True.
+    UpdateNote.objects.filter(pk=note.pk).update(
+        updated_at=note.created_at + dt.timedelta(seconds=5),
+    )
+    response = auth_client.get(reverse("projects:detail", args=[project.pk]))
+    assert "(edited)" in response.content.decode()
