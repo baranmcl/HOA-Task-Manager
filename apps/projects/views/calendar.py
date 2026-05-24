@@ -6,7 +6,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render
 
+from apps.roster.models import RosterPerson
+
 from ..models import Project
+from ._filters import resolve_person_filter
 
 _CAL = stdlib_calendar.Calendar(firstweekday=stdlib_calendar.SUNDAY)
 
@@ -46,14 +49,17 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
     if not (1 <= month <= 12) or not (1900 <= year <= 2100):
         raise Http404("Invalid year/month")
 
+    person_id, banner, selected_person = resolve_person_filter(request)
+
     first, last, weeks = build_month_grid(year, month)
 
-    projects = list(
-        Project.instances.select_related("category").filter(
-            projected_completion_date__gte=first,
-            projected_completion_date__lte=last,
-        ),
+    qs = Project.instances.select_related("category").filter(
+        projected_completion_date__gte=first,
+        projected_completion_date__lte=last,
     )
+    if person_id is not None:
+        qs = qs.filter(raci_assignments__person_id=person_id).distinct()
+    projects = list(qs)
 
     # Bucket projects by their due date.
     by_date: dict[dt.date, list[Project]] = {}
@@ -89,4 +95,7 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
         "today_year": today.year, "today_month": today.month,
         "weekday_headers": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         "status_chip_classes": STATUS_CHIP_CLASSES,
+        "people": RosterPerson.active.all(),
+        "selected_person": selected_person,
+        "unlinked_user_banner": banner,
     })

@@ -3,10 +3,12 @@ import calendar as stdlib_calendar
 import datetime as dt
 
 import pytest
+from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from apps.projects.models import Project, ProjectStatus
+from apps.projects.models import Project, ProjectStatus, RACIAssignment, RACIRole
 from apps.projects.views.calendar import build_month_grid
+from apps.roster.models import RosterPerson
 
 
 def test_build_month_grid_returns_six_weeks_of_seven_days():
@@ -137,3 +139,74 @@ def test_calendar_view_overflow_link_when_more_than_three_on_one_day(
     content = response.content.decode()
     # 3 chips visible, "+2 more" overflow link.
     assert "+2 more" in content
+
+
+@pytest.fixture
+def mike(db):
+    return RosterPerson.objects.create(name="Mike Smith")
+
+
+@pytest.fixture
+def laurel(db):
+    return RosterPerson.objects.create(name="Laurel Baran")
+
+
+@pytest.fixture
+def linked_client(db, client, mike):
+    User = get_user_model()
+    u = User.objects.create_user(
+        username="linked@example.com", email="linked@example.com",
+        password="Sufficiently-Long-Pw-1",
+    )
+    u.profile.roster_person = mike
+    u.profile.save()
+    client.force_login(u)
+    return client
+
+
+@pytest.mark.django_db
+def test_calendar_unlinked_user_sees_banner(auth_client):
+    response = auth_client.get(reverse("projects:calendar"))
+    assert "Link your account to a roster person" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_calendar_linked_user_defaults_to_their_projects(
+    linked_client, user, category, mike, laurel,
+):
+    p_mike = Project.objects.create(
+        title="Mike project", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 10),
+    )
+    RACIAssignment.objects.create(project=p_mike, person=mike, role=RACIRole.RESPONSIBLE)
+    p_laurel = Project.objects.create(
+        title="Laurel project", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 11),
+    )
+    RACIAssignment.objects.create(project=p_laurel, person=laurel, role=RACIRole.RESPONSIBLE)
+
+    response = linked_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    content = response.content.decode()
+    assert "Mike project" in content
+    assert "Laurel project" not in content
+
+
+@pytest.mark.django_db
+def test_calendar_person_all_overrides_default(
+    linked_client, user, category, mike, laurel,
+):
+    p_mike = Project.objects.create(
+        title="Mike project", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 10),
+    )
+    RACIAssignment.objects.create(project=p_mike, person=mike, role=RACIRole.RESPONSIBLE)
+    p_laurel = Project.objects.create(
+        title="Laurel project", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 11),
+    )
+    RACIAssignment.objects.create(project=p_laurel, person=laurel, role=RACIRole.RESPONSIBLE)
+
+    response = linked_client.get(reverse("projects:calendar_at", args=[2026, 5]) + "?person=all")
+    content = response.content.decode()
+    assert "Mike project" in content
+    assert "Laurel project" in content
