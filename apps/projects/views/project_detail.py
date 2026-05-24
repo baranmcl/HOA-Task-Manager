@@ -18,7 +18,7 @@ def detail(request, pk):
         Project.objects.select_related("category", "board_approval", "created_by").prefetch_related(
             "raci_assignments__person",
             "tags",
-            "notes__author",
+            "notes__author__profile__roster_person",
             "attachments__uploaded_by",
         ),
         pk=pk,
