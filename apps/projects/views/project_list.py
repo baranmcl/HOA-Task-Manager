@@ -1,3 +1,5 @@
+import datetime as dt
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, Count, IntegerField, Q, When
 from django.shortcuts import render
@@ -51,6 +53,15 @@ def list_view(request):
     if tag_slug:
         qs = qs.filter(tags__slug=tag_slug).distinct()
 
+    due_raw = request.GET.get("due", "").strip()
+    due_filter = None
+    if due_raw:
+        try:
+            due_filter = dt.date.fromisoformat(due_raw)
+            qs = qs.filter(projected_completion_date=due_filter)
+        except ValueError:
+            due_filter = None  # invalid — silently ignore
+
     q = request.GET.get("q", "").strip()
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q))
@@ -87,6 +98,7 @@ def list_view(request):
         "selected_sort": sort_key,
         "show_completed": show_completed,
         "q": q,
+        "due_filter": due_filter,
         "status_choices": ProjectStatus.choices,
         "role_choices": RACIRole.choices,
     })

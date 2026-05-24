@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 from django.urls import reverse
 
@@ -120,3 +122,54 @@ def test_tag_filter_composes_with_status(auth_client, user, category):
     )
     titles = [p.title for p in response.context["projects"]]
     assert titles == ["Audit, in progress"]
+
+
+@pytest.mark.django_db
+def test_due_filter_returns_only_matching_date(auth_client, user, category):
+    Project.objects.create(
+        title="May 15", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 15),
+    )
+    Project.objects.create(
+        title="May 16", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 16),
+    )
+    response = auth_client.get(reverse("projects:list") + "?due=2026-05-15")
+    titles = [p.title for p in response.context["projects"]]
+    assert titles == ["May 15"]
+
+
+@pytest.mark.django_db
+def test_due_filter_invalid_date_silently_ignored(auth_client, user, category):
+    Project.objects.create(
+        title="P1", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 15),
+    )
+    response = auth_client.get(reverse("projects:list") + "?due=tomorrow")
+    # Invalid date is silently ignored — all projects returned.
+    titles = [p.title for p in response.context["projects"]]
+    assert "P1" in titles
+
+
+@pytest.mark.django_db
+def test_due_filter_pill_rendered_when_active(auth_client, user, category):
+    Project.objects.create(
+        title="P1", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 15),
+    )
+    response = auth_client.get(reverse("projects:list") + "?due=2026-05-15")
+    content = response.content.decode()
+    assert "Due:" in content
+    assert "May 15, 2026" in content
+    assert ">clear<" in content
+
+
+@pytest.mark.django_db
+def test_due_filter_pill_absent_when_no_filter(auth_client, user, category):
+    Project.objects.create(
+        title="P1", category=category, created_by=user,
+        projected_completion_date=dt.date(2026, 5, 15),
+    )
+    response = auth_client.get(reverse("projects:list"))
+    content = response.content.decode()
+    assert "Due:" not in content
