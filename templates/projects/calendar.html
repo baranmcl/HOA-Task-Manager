@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Calendar — HOA Task Manager{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+  <h1 class="text-2xl font-semibold text-gray-900">Calendar — {{ month_label }}</h1>
+  <div class="flex gap-2 text-sm">
+    <a href="{% url 'projects:calendar_at' prev_year prev_month %}" class="btn-secondary">← Prev</a>
+    <a href="{% url 'projects:calendar_at' today_year today_month %}" class="btn-secondary">Today</a>
+    <a href="{% url 'projects:calendar_at' next_year next_month %}" class="btn-secondary">Next →</a>
+  </div>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+  <table class="w-full border-collapse text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        {% for label in weekday_headers %}
+          <th class="px-2 py-2 text-left text-xs uppercase text-gray-500 w-1/7">{{ label }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in weeks %}
+        <tr class="divide-x divide-gray-100">
+          {% for cell in week %}
+            <td class="align-top p-2 h-28 border-t border-gray-100
+                       {% if cell.is_other_month %}bg-gray-50 text-gray-300{% endif %}
+                       {% if cell.is_today %}bg-blue-50{% endif %}">
+              <div class="text-xs {% if cell.is_today %}font-semibold text-blue-700{% endif %} mb-1">
+                {{ cell.date.day }}
+              </div>
+              <div class="space-y-1">
+                {% for p in cell.projects %}
+                  <a href="{% url 'projects:detail' p.pk %}"
+                     class="pill block truncate {% if p.status == 'delayed' %}bg-red-100 text-red-800{% elif p.status == 'completed' %}bg-green-100 text-green-800{% elif p.status == 'in_progress' %}bg-blue-100 text-blue-800{% else %}bg-gray-100 text-gray-700{% endif %}"
+                     title="{{ p.title }} — {{ p.get_status_display }}">{{ p.title|truncatechars:24 }}</a>
+                {% endfor %}
+                {% if cell.overflow_count %}
+                  <a href="{% url 'projects:list' %}?due={{ cell.date|date:'Y-m-d' }}"
+                     class="text-xs text-gray-500 hover:underline block">+{{ cell.overflow_count }} more</a>
+                {% endif %}
+              </div>
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
