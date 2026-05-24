@@ -1,4 +1,4 @@
 <li class="border-l-2 border-gray-200 pl-3">
-  <div class="text-xs text-gray-500 mb-1">{{ n.created_at|date:"M j, Y · g:i A" }} · {{ n.author.email|default:n.author.username }}</div>
+  <div class="text-xs text-gray-500 mb-1">{{ n.created_at|date:"M j, Y · g:i A" }} · {{ n.author.profile.display_name }}</div>
   <div class="prose prose-sm text-gray-800">{{ n.rendered_html|safe }}</div>
 </li>
