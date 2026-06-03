@@ -69,34 +69,95 @@ def test_password_reset_done_renders(client):
 
 @pytest.mark.django_db
 def test_password_reset_confirm_with_valid_token_lets_user_set_password(client, user):
-    """End-to-end: token → set new password → can log in with new password."""
+    """End-to-end: token URL → set new password → can log in with new password.
+
+    Our custom view is stateless — it renders the form directly on GET
+    without a redirect chain, then accepts the POST at the same URL.
+    """
     uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
-
-    # Django's PasswordResetConfirmView redirects the initial GET to
-    # /reset/<uidb64>/set-password/ after stashing the token in the session.
-    response = client.get(
-        reverse("accounts:password_reset_confirm",
-                kwargs={"uidb64": uidb64, "token": token}),
-        follow=True,
+    reset_url = reverse(
+        "accounts:password_reset_confirm",
+        kwargs={"uidb64": uidb64, "token": token},
     )
-    assert response.status_code == 200
-    # The follow lands on the set-password form.
-    final_url = response.redirect_chain[-1][0]
-    assert "set-password" in final_url
 
-    # Now POST a new password to that URL.
-    response = client.post(final_url, {
+    response = client.get(reset_url)
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Set your password" in content
+
+    response = client.post(reset_url, {
         "new_password1": "BrandNewSecret-999",
         "new_password2": "BrandNewSecret-999",
     })
     assert response.status_code == 302
     assert response.url == reverse("accounts:password_reset_complete")
 
-    # Old password no longer works; new one does.
     user.refresh_from_db()
     assert not user.check_password("OldPassword123")
     assert user.check_password("BrandNewSecret-999")
+
+
+@pytest.mark.django_db
+def test_token_url_idempotent_across_visitor_sessions(client, user, django_user_model):
+    """Regression test for the production bug we hit on 2026-06-03.
+
+    The old session-stash design failed when a scanner (Gmail's safety
+    checker, Outlook Safe Links, etc.) GET'd the URL before the user's
+    click — the token got stashed in the scanner's session and the user
+    got "Link expired or invalid". This stateless flow proves the URL
+    works regardless of how many independent sessions visit it first.
+    """
+    from django.test import Client
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = reverse(
+        "accounts:password_reset_confirm",
+        kwargs={"uidb64": uidb64, "token": token},
+    )
+
+    scanner_client = Client()
+    scanner_response = scanner_client.get(reset_url)
+    assert scanner_response.status_code == 200
+    assert "Set your password" in scanner_response.content.decode()
+
+    user_client = Client()
+    user_response = user_client.get(reset_url)
+    assert user_response.status_code == 200
+    assert "Set your password" in user_response.content.decode()
+
+    response = user_client.post(reset_url, {
+        "new_password1": "MyChosen-Password-9",
+        "new_password2": "MyChosen-Password-9",
+    })
+    assert response.status_code == 302
+    user.refresh_from_db()
+    assert user.check_password("MyChosen-Password-9")
+
+
+@pytest.mark.django_db
+def test_token_invalidated_after_successful_password_change(client, user):
+    """After a successful POST, the token must no longer work — clicking
+    the same link a second time should land on the invalid-link page.
+    This is built-in token behavior (user.password is part of the token's
+    input, so changing it invalidates the token), but worth covering as
+    a regression test against any future change that breaks it.
+    """
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = reverse(
+        "accounts:password_reset_confirm",
+        kwargs={"uidb64": uidb64, "token": token},
+    )
+
+    client.post(reset_url, {
+        "new_password1": "BrandNewSecret-999",
+        "new_password2": "BrandNewSecret-999",
+    })
+
+    response = client.get(reset_url)
+    assert response.status_code == 200
+    assert "Link expired or invalid" in response.content.decode()
 
 
 @pytest.mark.django_db

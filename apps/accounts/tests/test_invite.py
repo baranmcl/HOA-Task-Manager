@@ -139,12 +139,17 @@ def test_invite_email_normalized_to_lowercase(staff_client):
 
 
 @pytest.mark.django_db
-def test_invite_full_activation_flow(staff_client, client):
+def test_invite_full_activation_flow(staff_client):
     """End-to-end: invite → click link → set password → log in.
 
-    Uses two clients: staff_client to send the invite, then a fresh
-    anonymous client to follow the link (the invitee's perspective).
+    Uses a separate Client() for the invitee (not the staff_client) so
+    the activation page renders the unauthenticated layout — in
+    production the invitee's browser has no session, and base.html
+    only emits the form (via {% block unauth_content %}) when the
+    user is anonymous.
     """
+    from django.test import Client
+
     # 1. Staff invites.
     staff_client.post(reverse("accounts:invite_user"), {
         "email": "newbie@example.com",
@@ -155,15 +160,14 @@ def test_invite_full_activation_flow(staff_client, client):
         mail.outbox[0].body,
     ).group(1)
 
-    # 2. Invitee follows the link — Django stashes the token and redirects
-    #    to /accounts/reset/<uidb64>/set-password/.
-    response = client.get(activation_url, follow=True)
+    # 2. Invitee (fresh anonymous client) opens the link — form renders.
+    invitee_client = Client()
+    response = invitee_client.get(activation_url)
     assert response.status_code == 200
-    set_password_url = response.redirect_chain[-1][0]
-    assert "set-password" in set_password_url
+    assert "Set your password" in response.content.decode()
 
-    # 3. Invitee sets a password.
-    response = client.post(set_password_url, {
+    # 3. Invitee submits a password to the same URL.
+    response = invitee_client.post(activation_url, {
         "new_password1": "MyChosen-Password-9",
         "new_password2": "MyChosen-Password-9",
     })

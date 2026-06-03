@@ -3,14 +3,15 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
 from django.core.management import call_command
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.http import require_http_methods
 
 from .forms import InviteUserForm, ProfileForm
@@ -135,3 +136,57 @@ def invite_user(request):
 @user_passes_test(lambda u: u.is_staff)
 def invite_sent(request):
     return render(request, "accounts/invite_sent.html")
+
+
+def password_reset_confirm(request, uidb64, token):
+    """Stateless password reset confirm view.
+
+    Replaces Django's PasswordResetConfirmView, which uses a session-stash
+    redirect step (/reset/<uid>/<token>/ → 302 → /reset/<uid>/set-password/)
+    to keep the token out of HTTP Referer headers. That design fails in
+    production when email-safety scanners (Gmail, Outlook, M365 Safe Links)
+    follow the redirect server-side before the user's actual click — the
+    token ends up stashed in the scanner's session, and the user's
+    subsequent click hits a session-less /set-password/ URL with
+    validlink=False.
+
+    Our SECURE_REFERRER_POLICY='same-origin' already prevents the
+    Referer-leak risk that motivated session-stashing in upstream Django,
+    so a stateless flow is both safer (works for real users) and no less
+    secure (token still isn't leaked off-origin).
+
+    This view validates the token from the URL on every request and either
+    renders the form or the invalid-link page directly — no redirect, no
+    session writes. Token consumption happens only on a successful POST
+    (changing the password invalidates the token because user.password is
+    part of the token generator's input).
+    """
+    User = get_user_model()
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    validlink = (
+        user is not None
+        and default_token_generator.check_token(user, token)
+    )
+
+    if not validlink:
+        return render(request, "registration/password_reset_confirm.html", {
+            "validlink": False,
+        })
+
+    if request.method == "POST":
+        form = SetPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("accounts:password_reset_complete")
+    else:
+        form = SetPasswordForm(user)
+
+    return render(request, "registration/password_reset_confirm.html", {
+        "form": form,
+        "validlink": True,
+    })
