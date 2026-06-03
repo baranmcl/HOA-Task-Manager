@@ -1,9 +1,17 @@
-# Deploying to PythonAnywhere (current staging host)
+# Deploying to PythonAnywhere (retained but dormant)
 
-PythonAnywhere is the **active** host for the HOA Task Manager staging app.
-It is genuinely free. The Fly.io setup (`Dockerfile`, `fly.toml`,
-`entrypoint.sh`, `.github/workflows/deploy-staging.yml`) is retained but
-dormant — see the bottom of this file to switch back.
+**Status as of 2026-06-03: dormant.** Staging now runs on Fly.io — see
+`.github/workflows/deploy-staging.yml` (push-trigger deploy) and
+`fly.toml`. This runbook is retained as a fallback path: if Fly ever
+becomes untenable, the steps below still work, since the PythonAnywhere
+free tier account is unmodified and the codebase still supports
+deployment there.
+
+PythonAnywhere is genuinely free, which is why it was used as a
+deliberate cost-saving intermediate host. The Fly infrastructure was
+retained intact during that period so the eventual switch-back was a
+configuration-restoration exercise, not new implementation. See
+`docs/runbooks/switch-back-to-fly.md` for the history of that cutover.
 
 PythonAnywhere has no Docker, no CLI, and no SSH on free accounts, so this
 is a manual, one-time setup done through their **Bash console** and **web

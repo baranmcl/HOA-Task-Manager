@@ -4,7 +4,7 @@ A small, opinionated project tracker for an HOA board. Built to replace
 the usual mix of spreadsheets, email chains, and "didn't we discuss that
 in April?"
 
-- **Live staging:** <https://cica.pythonanywhere.com>
+- **Live staging:** <https://hoa-task-manager-staging.fly.dev> (custom domain coming soon)
 - **Walkthrough for board members:** [`docs/board-presentation.md`](docs/board-presentation.md)
 - **Source:** <https://github.com/baranmcl/HOA-Task-Manager>
 
@@ -52,7 +52,7 @@ presentation for the rationale.
   attachments and daily DB backups.
 - **Tests:** `pytest-django`, ~360 tests, all hitting a real test DB.
 - **Lint:** `ruff` with `E F I B UP DJ` rules.
-- **Hosting:** PythonAnywhere free tier (staging).
+- **Hosting:** Fly.io (staging, push-triggered deploys via GitHub Actions).
 
 ## Local development
 
@@ -120,13 +120,20 @@ docs/
 
 ## Deployment
 
-Staging runs on PythonAnywhere free tier. The end-to-end one-time
-setup and the routine "pull / collectstatic / reload" update flow are
-in [`docs/runbooks/deploy-pythonanywhere.md`](docs/runbooks/deploy-pythonanywhere.md).
+Staging runs on Fly.io. Every push to `main` triggers a Docker build
+and rolling deploy via GitHub Actions
+([`.github/workflows/deploy-staging.yml`](.github/workflows/deploy-staging.yml)).
+The cutover history from PythonAnywhere is in
+[`docs/runbooks/switch-back-to-fly.md`](docs/runbooks/switch-back-to-fly.md);
+the original PythonAnywhere setup is preserved at
+[`docs/runbooks/deploy-pythonanywhere.md`](docs/runbooks/deploy-pythonanywhere.md)
+as a dormant fallback.
 
-Fly.io setup is retained but dormant — see
-[`docs/runbooks/switch-back-to-fly.md`](docs/runbooks/switch-back-to-fly.md)
-if PythonAnywhere ever stops working.
+The Dockerfile builds Tailwind CSS in a separate stage, then assembles
+a Python 3.12 runtime with `uv`. The entrypoint runs migrations on the
+mounted volume (where SQLite lives) before handing off to gunicorn.
+A `RESTORE_FROM_R2_KEY` env var, when set, triggers a one-shot DB
+restore from R2 before migrations run — useful for disaster recovery.
 
 ## Data model notes
 

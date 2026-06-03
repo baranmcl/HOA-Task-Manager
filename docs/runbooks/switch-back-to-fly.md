@@ -1,10 +1,28 @@
 # Switching back to Fly.io from PythonAnywhere
 
+**Status: ✅ COMPLETED on 2026-06-03.** Staging now runs on Fly. This
+runbook is retained as a record of how the cutover happened and as a
+fallback reference if we ever need to do it again.
+
 This runbook walks through migrating the running staging app from
 PythonAnywhere back to Fly.io. The Fly infrastructure has been retained
 in this repo continuously since the original switch — see
 `docs/runbooks/deploy-pythonanywhere.md` for context — so the work here
 is mostly configuration restoration, not new implementation.
+
+**One deviation from the runbook in practice (2026-06-03):** The
+documented SFTP upload step (Part 3 step 3) failed on the operator's
+local network — `flyctl ssh sftp` couldn't complete the WireGuard
+WebSocket handshake to `dfw2.gateway.6pn.dev`, returning
+`tls: first record does not look like a TLS handshake`. The workaround
+was to upload the DB to R2 via the Cloudflare dashboard, then
+have the container's entrypoint download it on boot via a new
+`RESTORE_FROM_R2_KEY` env var hook (see entrypoint.sh). This hook is
+retained as a permanent disaster-recovery mechanism. To use it for
+future restores: upload a backup to R2, `fly secrets set
+RESTORE_FROM_R2_KEY=<key>`, wait for the auto-restart, then
+`fly secrets unset RESTORE_FROM_R2_KEY` to prevent re-overwriting on
+subsequent restarts.
 
 **When to do this:** When the friction of PythonAnywhere's manual deploy,
 virtualenv activation, or CPU-second limits outweighs the $0 baseline,
