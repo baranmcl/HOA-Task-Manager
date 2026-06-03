@@ -50,6 +50,7 @@ urlpatterns = [
     path("attachment/<int:pk>/delete/", views.attachment_delete, name="attachment_delete"),
     path("attachment/<int:pk>/download/", views.attachment_download, name="attachment_download"),
     path("<int:pk>/raci/add/", views.raci_add, name="raci_add"),
+    path("<int:pk>/raci/add-group/", views.raci_add_group, name="raci_add_group"),
     path("raci/<int:pk>/remove/", views.raci_remove, name="raci_remove"),
     path("<int:pk>/approval/add/", views.approval_add, name="approval_add"),
     path("<int:pk>/approval/edit/", views.approval_edit, name="approval_edit"),

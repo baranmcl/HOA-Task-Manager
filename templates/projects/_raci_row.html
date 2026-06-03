@@ -2,6 +2,7 @@
   <span>
     <span class="pill bg-gray-100 text-gray-700 mr-2">{{ a.role|first|upper }}</span>
     {{ a.person.name }}{% if a.person.archived %} <span class="text-xs text-gray-400">(archived)</span>{% endif %}
+    {% if a.source_group %}<span class="text-xs text-gray-500 ml-1">via {{ a.source_group.name }}</span>{% endif %}
   </span>
   <button type="button"
     hx-post="{% url 'projects:raci_remove' a.pk %}"

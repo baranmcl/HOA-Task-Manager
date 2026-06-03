@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ group.name }} — HOA Task Manager{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-semibold text-gray-900">{{ group.name }}</h1>
+  <div class="flex gap-2">
+    <a href="{% url 'roster:group_list' %}" class="btn-secondary">← Groups</a>
+    <a href="{% url 'roster:group_edit' group.pk %}" class="btn-secondary">Edit</a>
+    <form method="post" action="{% url 'roster:group_delete' group.pk %}" class="inline"
+          onsubmit="return confirm('Delete this group? Existing project RACI assignments stay, but lose the &quot;via {{ group.name|escapejs }}&quot; annotation.')">
+      {% csrf_token %}
+      <button type="submit" class="btn-secondary text-red-700">Delete group</button>
+    </form>
+  </div>
+</div>
+
+{% if group.description %}
+<div class="bg-white rounded-lg shadow p-4 mb-6 max-w-2xl">
+  <p class="text-sm text-gray-700">{{ group.description|linebreaks }}</p>
+</div>
+{% endif %}
+
+<section class="bg-white rounded-lg shadow p-5 mb-6 max-w-2xl">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Members</h2>
+  {% if members %}
+    <ul class="divide-y divide-gray-100">
+      {% for m in members %}
+      <li class="py-2 flex items-center justify-between text-sm">
+        <a class="text-blue-700 hover:underline" href="{% url 'roster:detail' m.person.pk %}">{{ m.person.name }}</a>
+        <form method="post" action="{% url 'roster:group_member_remove' m.pk %}" class="inline"
+              onsubmit="return confirm('Remove {{ m.person.name|escapejs }} from this group?')">
+          {% csrf_token %}
+          <button type="submit" class="text-xs text-red-700 hover:underline">Remove</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500 text-sm">No members yet. Add someone below.</p>
+  {% endif %}
+</section>
+
+<section class="bg-white rounded-lg shadow p-5 max-w-2xl">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Add member</h2>
+  {% if available_people %}
+    <form method="post" action="{% url 'roster:group_member_add' group.pk %}" class="flex items-end gap-2">
+      {% csrf_token %}
+      <div class="flex-1">
+        <label class="label" for="add-person">Person</label>
+        <select name="person" id="add-person" class="input">
+          {% for p in available_people %}
+            <option value="{{ p.pk }}">{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn-primary">Add</button>
+    </form>
+  {% else %}
+    <p class="text-gray-500 text-sm">All active roster people are already in this group.</p>
+  {% endif %}
+</section>
+{% endblock %}

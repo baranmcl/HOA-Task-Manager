@@ -2,12 +2,12 @@
   <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">RACI</h2>
   <ul id="raci-list-{{ project.pk }}" class="space-y-1 mb-3">
     {% for a in project.raci_assignments.all %}{% include "projects/_raci_row.html" %}{% empty %}
-      <li class="text-sm text-gray-400">No assignments yet — pick a person and role below.</li>
+      <li class="text-sm text-gray-400">No assignments yet — pick a person or a group below.</li>
     {% endfor %}
   </ul>
   <form hx-post="{% url 'projects:raci_add' project.pk %}"
         hx-target="closest section" hx-swap="outerHTML"
-        class="flex gap-2 text-sm">
+        class="flex gap-2 text-sm mb-2">
     {% csrf_token %}
     <select name="person" class="input flex-1">
       <option value="">Select person…</option>
@@ -18,4 +18,19 @@
     </select>
     <button type="submit" class="btn-secondary">Add</button>
   </form>
+  {% if available_groups %}
+    <form hx-post="{% url 'projects:raci_add_group' project.pk %}"
+          hx-target="closest section" hx-swap="outerHTML"
+          class="flex gap-2 text-sm">
+      {% csrf_token %}
+      <select name="group" class="input flex-1">
+        <option value="">Select group…</option>
+        {% for g in available_groups %}<option value="{{ g.pk }}">{{ g.name }} ({{ g.member_count }})</option>{% endfor %}
+      </select>
+      <select name="role" class="input w-40 shrink-0">
+        {% for value, label in raci_role_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn-secondary">Add group</button>
+    </form>
+  {% endif %}
 </section>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{% if group %}Edit{% else %}New{% endif %} group — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-6">
+  {% if group %}Edit {{ group.name }}{% else %}New group{% endif %}
+</h1>
+<form method="post" class="bg-white rounded-lg shadow p-6 max-w-xl space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-2 pt-2">
+    <button type="submit" class="btn-primary">Save</button>
+    {% if group %}
+      <a href="{% url 'roster:group_detail' group.pk %}" class="btn-secondary">Cancel</a>
+    {% else %}
+      <a href="{% url 'roster:group_list' %}" class="btn-secondary">Cancel</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

@@ -3,7 +3,10 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <h1 class="text-2xl font-semibold text-gray-900">Roster</h1>
-  <a href="{% url 'roster:create' %}" class="btn-primary">+ New person</a>
+  <div class="flex gap-2">
+    <a href="{% url 'roster:group_list' %}" class="btn-secondary">Groups</a>
+    <a href="{% url 'roster:create' %}" class="btn-primary">+ New person</a>
+  </div>
 </div>
 
 <div class="mb-4 flex gap-4 text-sm">

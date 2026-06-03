@@ -39,6 +39,7 @@ from .project_form import create as create
 from .project_form import edit as edit
 from .project_list import list_view as list_view
 from .raci import raci_add as raci_add
+from .raci import raci_add_group as raci_add_group
 from .raci import raci_remove as raci_remove
 from .recurring import recurring_create as recurring_create
 from .recurring import recurring_edit as recurring_edit
