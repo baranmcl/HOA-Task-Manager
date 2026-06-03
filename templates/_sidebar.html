@@ -14,6 +14,9 @@
     <a href="{% url 'projects:report' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Reports</a>
     <a href="{% url 'projects:import_form' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Import projects</a>
     <a href="{% url 'roster:list' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Roster</a>
+    {% if user.is_staff %}
+      <a href="{% url 'accounts:invite_user' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Invite user</a>
+    {% endif %}
     <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Account</a>
     <form method="post" action="{% url 'accounts:logout' %}" class="pt-4">
       {% csrf_token %}

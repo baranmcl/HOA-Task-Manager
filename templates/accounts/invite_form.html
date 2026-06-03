@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Invite a user — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-2">Invite a user</h1>
+<p class="text-sm text-gray-600 mb-6 max-w-xl">
+  Creates an account and emails the recipient an activation link. They'll
+  set their own password from that link — you never see or set it. The
+  link is good for 3 days.
+</p>
+
+<form method="post" class="bg-white rounded-lg shadow p-6 max-w-xl space-y-4">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text|safe }}</p>{% endif %}
+      {% if field.errors %}<p class="text-sm text-red-700 mt-1">{{ field.errors|join:", " }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  <div class="flex gap-2 pt-2">
+    <button type="submit" class="btn-primary">Send invitation</button>
+    <a href="{% url 'home' %}" class="btn-secondary">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,16 @@
+Hi{% if invitee.first_name %} {{ invitee.first_name }}{% endif %},
+
+{{ inviter_name }} has invited you to the HOA Task Manager — a small
+project tracker for our board.
+
+To activate your account, set your password here:
+
+{{ activation_url }}
+
+The link is good for 3 days. If it expires before you use it, you can
+request a fresh one from {{ site_url }}accounts/password/reset/ — just
+enter this email address ({{ invitee.email }}).
+
+Once you've set your password, sign in at {{ site_url }}.
+
+— The HOA Task Manager team

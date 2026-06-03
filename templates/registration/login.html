@@ -19,6 +19,9 @@
       <input type="password" name="password" id="id_password" required class="input">
     </div>
     <button type="submit" class="btn-primary w-full justify-center">Sign in</button>
+    <p class="text-sm text-gray-500 text-center pt-2">
+      <a class="text-blue-700 hover:underline" href="{% url 'accounts:password_reset' %}">Forgot password?</a>
+    </p>
   </form>
 </div>
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Invitation sent — HOA Task Manager{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-semibold text-gray-900 mb-4">Invitation sent</h1>
+<div class="bg-white rounded-lg shadow p-6 max-w-xl">
+  <p class="text-sm text-gray-700 mb-4">
+    The activation link has been emailed. The recipient has 3 days to set
+    their password from the link. After that, you can send a fresh
+    password-reset link from the sign-in page's "Forgot password?" flow.
+  </p>
+  <div class="flex gap-2">
+    <a href="{% url 'accounts:invite_user' %}" class="btn-primary">Invite another</a>
+    <a href="{% url 'home' %}" class="btn-secondary">Done</a>
+  </div>
+</div>
+{% endblock %}
