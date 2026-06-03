@@ -50,6 +50,13 @@
                   <a href="{% url 'projects:list' %}?due={{ cell.date|date:'Y-m-d' }}"
                      class="text-xs text-gray-500 hover:underline block">+{{ cell.overflow_count }} more</a>
                 {% endif %}
+                {% for item in cell.checklist_items %}
+                  <a href="{% url 'projects:detail' item.project.pk %}"
+                     class="block truncate text-xs leading-tight {% if item.is_overdue %}text-red-700{% else %}text-gray-600{% endif %} hover:underline"
+                     title="{{ item.project.title }}: {{ item.text }}">
+                    ☐ {{ item.text|truncatechars:20 }}
+                  </a>
+                {% endfor %}
               </div>
             </td>
           {% endfor %}

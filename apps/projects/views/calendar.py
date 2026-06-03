@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from apps.roster.models import RosterPerson
 
-from ..models import Project
+from ..models import ChecklistItem, Project
 from ._filters import resolve_person_filter
 
 _CAL = stdlib_calendar.Calendar(firstweekday=stdlib_calendar.SUNDAY)
@@ -66,18 +66,51 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
     for p in projects:
         by_date.setdefault(p.projected_completion_date, []).append(p)
 
+    # Checklist items: show incomplete items with due dates in this window.
+    # Visibility follows project visibility — if the user's person filter
+    # hides a project, its checklist items are hidden too. We use the same
+    # `Project.instances` filter as projects (above) so the visibility
+    # rules match exactly.
+    visible_project_ids = {p.pk for p in projects}
+    # Also include checklist items from projects whose project itself
+    # doesn't have a due_date in this month, but the item does. That
+    # means we need to look up project visibility separately.
+    item_project_qs = Project.instances
+    if person_id is not None:
+        item_project_qs = item_project_qs.filter(
+            raci_assignments__person_id=person_id,
+        ).distinct()
+    eligible_project_ids = set(item_project_qs.values_list("pk", flat=True))
+    visible_project_ids |= eligible_project_ids
+
+    items_qs = ChecklistItem.objects.filter(
+        project_id__in=visible_project_ids,
+        completed=False,
+        due_date__isnull=False,
+        due_date__gte=first,
+        due_date__lte=last,
+    ).select_related("project")
+    items_by_date: dict[dt.date, list[ChecklistItem]] = {}
+    for item in items_qs:
+        items_by_date.setdefault(item.due_date, []).append(item)
+
     # Build the cell structure the template iterates over.
     cells_by_week = []
     for week in weeks:
         row = []
         for day in week:
             day_projects = by_date.get(day, [])
+            day_items = items_by_date.get(day, [])
             row.append({
                 "date": day,
                 "is_other_month": day.month != month,
                 "is_today": day == today,
                 "projects": day_projects[:CELL_CHIP_LIMIT],
                 "overflow_count": max(0, len(day_projects) - CELL_CHIP_LIMIT),
+                # Checklist items get their own list — rendered smaller +
+                # below project pills so the visual hierarchy stays
+                # projects-first.
+                "checklist_items": day_items,
             })
         cells_by_week.append(row)
 

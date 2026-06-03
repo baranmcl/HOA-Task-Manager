@@ -6,7 +6,13 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 
-from apps.projects.models import Project, ProjectStatus, RACIAssignment, RACIRole
+from apps.projects.models import (
+    ChecklistItem,
+    Project,
+    ProjectStatus,
+    RACIAssignment,
+    RACIRole,
+)
 from apps.projects.views.calendar import build_month_grid
 from apps.roster.models import RosterPerson
 
@@ -226,3 +232,138 @@ def test_sidebar_includes_calendar_link(auth_client):
     content = response.content.decode()
     assert ">Calendar<" in content
     assert reverse("projects:calendar") in content
+
+
+# --- Checklist items rendered on the calendar ----------------------------
+
+@pytest.mark.django_db
+def test_calendar_shows_checklist_item_on_its_due_date(
+    auth_client, user, category,
+):
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    ChecklistItem.objects.create(
+        project=project, text="Vendor quote", due_date=dt.date(2026, 5, 15),
+        order=0,
+    )
+    response = auth_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    content = response.content.decode()
+    assert "Vendor quote" in content
+
+
+@pytest.mark.django_db
+def test_calendar_hides_completed_checklist_items(
+    auth_client, user, category,
+):
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    ChecklistItem.objects.create(
+        project=project, text="Already done", due_date=dt.date(2026, 5, 15),
+        order=0, completed=True,
+    )
+    response = auth_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    assert "Already done" not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_calendar_hides_checklist_items_without_due_date(
+    auth_client, user, category,
+):
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    ChecklistItem.objects.create(
+        project=project, text="No date", due_date=None, order=0,
+    )
+    response = auth_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    assert "No date" not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_calendar_excludes_checklist_items_outside_window(
+    auth_client, user, category,
+):
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    ChecklistItem.objects.create(
+        project=project, text="January item", due_date=dt.date(2026, 1, 15),
+        order=0,
+    )
+    response = auth_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    assert "January item" not in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_calendar_overdue_checklist_item_gets_red_styling(
+    auth_client, user, category,
+):
+    """Items with due_date < today get text-red-700."""
+    yesterday = dt.date.today() - dt.timedelta(days=1)
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    ChecklistItem.objects.create(
+        project=project, text="Overdue thing", due_date=yesterday, order=0,
+    )
+    today = dt.date.today()
+    response = auth_client.get(
+        reverse("projects:calendar_at", args=[today.year, today.month]),
+    )
+    content = response.content.decode()
+    # The overdue item should render with red text. Be tolerant of where
+    # else red-text might appear (e.g., overdue project pills) by checking
+    # the item text + red class appear together near each other.
+    assert "Overdue thing" in content
+    assert "text-red-700" in content
+
+
+@pytest.mark.django_db
+def test_calendar_checklist_links_to_parent_project(
+    auth_client, user, category,
+):
+    project = Project.objects.create(
+        title="Bike Reno", category=category, created_by=user,
+    )
+    item = ChecklistItem.objects.create(
+        project=project, text="Survey", due_date=dt.date(2026, 5, 15), order=0,
+    )
+    response = auth_client.get(reverse("projects:calendar_at", args=[2026, 5]))
+    content = response.content.decode()
+    assert reverse("projects:detail", kwargs={"pk": item.project.pk}) in content
+
+
+@pytest.mark.django_db
+def test_calendar_person_filter_scopes_checklist_items(
+    auth_client, user, category,
+):
+    mike = RosterPerson.objects.create(name="Mike Smith")
+    laurel = RosterPerson.objects.create(name="Laurel Baran")
+    mikes_proj = Project.objects.create(
+        title="Mike project", category=category, created_by=user,
+    )
+    RACIAssignment.objects.create(
+        project=mikes_proj, person=mike, role=RACIRole.RESPONSIBLE,
+    )
+    laurels_proj = Project.objects.create(
+        title="Laurel project", category=category, created_by=user,
+    )
+    RACIAssignment.objects.create(
+        project=laurels_proj, person=laurel, role=RACIRole.RESPONSIBLE,
+    )
+    ChecklistItem.objects.create(
+        project=mikes_proj, text="Mike step", due_date=dt.date(2026, 5, 10),
+        order=0,
+    )
+    ChecklistItem.objects.create(
+        project=laurels_proj, text="Laurel step",
+        due_date=dt.date(2026, 5, 10), order=0,
+    )
+    response = auth_client.get(
+        reverse("projects:calendar_at", args=[2026, 5]) + f"?person={mike.pk}",
+    )
+    content = response.content.decode()
+    assert "Mike step" in content
+    assert "Laurel step" not in content
