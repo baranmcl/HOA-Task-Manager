@@ -3,6 +3,17 @@
 # unlike Fly's release_command machine), then hand off to gunicorn.
 set -e
 
+# One-shot restore-from-R2: if RESTORE_FROM_R2_KEY is set, pull that object
+# from the R2 bucket and overwrite /data/db.sqlite3 before migrations run.
+# Useful for disaster recovery and for the initial seed when SSH/SFTP into
+# the volume isn't available. Unset RESTORE_FROM_R2_KEY after a successful
+# restore — otherwise every machine restart will re-overwrite the DB.
+if [ -n "$RESTORE_FROM_R2_KEY" ]; then
+  echo "[entrypoint] Restoring /data/db.sqlite3 from R2 key: $RESTORE_FROM_R2_KEY"
+  uv run python -c "import boto3, os; boto3.client('s3', endpoint_url=os.environ['R2_ENDPOINT_URL'], aws_access_key_id=os.environ['R2_ACCESS_KEY_ID'], aws_secret_access_key=os.environ['R2_SECRET_ACCESS_KEY']).download_file(os.environ['R2_BUCKET'], os.environ['RESTORE_FROM_R2_KEY'], '/data/db.sqlite3')"
+  echo "[entrypoint] Restore complete. Unset RESTORE_FROM_R2_KEY to prevent re-restore on next start."
+fi
+
 uv run python manage.py migrate --noinput
 
 # One-time superuser bootstrap. createsuperuser --noinput reads
