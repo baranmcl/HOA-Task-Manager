@@ -72,11 +72,14 @@ def test_board_places_projects_in_correct_columns(auth_client, user, category):
 
 @pytest.mark.django_db
 def test_board_excludes_recurring_templates(auth_client, user, category):
+    # next_due_date is set far in the future so the RecurringGenerationMiddleware
+    # doesn't create instances (titled "Template only — <suffix>") during the
+    # request, which would defeat the substring-based assertion below.
     Project.objects.create(
         title="Template only", category=category, created_by=user,
         status=ProjectStatus.NOT_STARTED,
         is_recurring_template=True, recurrence_rule="monthly",
-        next_due_date=dt.date(2026, 6, 1),
+        next_due_date=dt.date(2099, 6, 1),
     )
     response = auth_client.get(reverse("projects:board"))
     assert "Template only" not in response.content.decode()
