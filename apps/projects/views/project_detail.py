@@ -21,6 +21,7 @@ def detail(request, pk):
             "tags",
             "notes__author__profile__roster_person",
             "attachments__uploaded_by",
+            "checklist_items",
         ),
         pk=pk,
     )
@@ -45,5 +46,6 @@ def detail(request, pk):
             "priority_choices": ProjectPriority.choices,
             "available_people": available_people,
             "available_groups": available_groups,
+            "items": project.checklist_items.all(),
         },
     )

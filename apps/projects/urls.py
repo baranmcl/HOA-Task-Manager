@@ -52,6 +52,11 @@ urlpatterns = [
     path("<int:pk>/raci/add/", views.raci_add, name="raci_add"),
     path("<int:pk>/raci/add-group/", views.raci_add_group, name="raci_add_group"),
     path("raci/<int:pk>/remove/", views.raci_remove, name="raci_remove"),
+    path("<int:pk>/checklist/add/", views.checklist_add, name="checklist_add"),
+    path("<int:pk>/checklist/mark-project-complete/",
+         views.checklist_mark_project_complete, name="checklist_mark_project_complete"),
+    path("checklist/<int:pk>/toggle/", views.checklist_toggle, name="checklist_toggle"),
+    path("checklist/<int:pk>/delete/", views.checklist_delete, name="checklist_delete"),
     path("<int:pk>/approval/add/", views.approval_add, name="approval_add"),
     path("<int:pk>/approval/edit/", views.approval_edit, name="approval_edit"),
 

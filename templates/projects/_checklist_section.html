@@ -1,0 +1,82 @@
+<section class="bg-white rounded-lg shadow p-5">
+  <h2 class="text-sm font-semibold text-gray-500 uppercase mb-3">Checklist</h2>
+
+  {% if items %}
+    <ul class="space-y-1 mb-3">
+      {% for item in items %}
+        <li class="flex items-start gap-3 text-sm py-1">
+          <form hx-post="{% url 'projects:checklist_toggle' item.pk %}"
+                hx-target="closest section"
+                hx-swap="outerHTML"
+                class="inline mt-0.5">
+            {% csrf_token %}
+            <button type="submit" class="block"
+                    aria-label="{% if item.completed %}Mark incomplete{% else %}Mark complete{% endif %}">
+              <span class="inline-block w-4 h-4 rounded border
+                {% if item.completed %}bg-green-600 border-green-600{% else %}bg-white border-gray-400{% endif %}
+                hover:border-blue-500">
+                {% if item.completed %}
+                  <svg class="w-3 h-3 text-white mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                {% endif %}
+              </span>
+            </button>
+          </form>
+          <div class="flex-1 {% if item.completed %}text-gray-400 line-through{% endif %}">
+            {{ item.text }}
+            {% if item.due_date %}
+              <span class="text-xs ml-2 {% if item.is_overdue %}text-red-700{% else %}text-gray-500{% endif %}">
+                due {{ item.due_date|date:"M j" }}
+              </span>
+            {% endif %}
+          </div>
+          <button type="button"
+            hx-post="{% url 'projects:checklist_delete' item.pk %}"
+            hx-target="closest section"
+            hx-swap="outerHTML"
+            hx-confirm="Delete this checklist item?"
+            class="text-xs text-red-600 hover:underline shrink-0">remove</button>
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="text-xs text-gray-500 mb-3">
+      {% with done=items|length total=items|length %}
+        {{ items|length }} item{{ items|length|pluralize }}.
+      {% endwith %}
+    </div>
+  {% else %}
+    <p class="text-sm text-gray-400 mb-3">No checklist items yet — add one below.</p>
+  {% endif %}
+
+  <form hx-post="{% url 'projects:checklist_add' project.pk %}"
+        hx-target="closest section"
+        hx-swap="outerHTML"
+        hx-on::after-request="if(event.detail.successful) this.reset()"
+        class="flex gap-2 text-sm">
+    {% csrf_token %}
+    <input type="text" name="text" class="input flex-1"
+           placeholder="Add a checklist item…" required maxlength="200">
+    <input type="date" name="due_date" class="input w-40 shrink-0"
+           aria-label="Optional due date">
+    <button type="submit" class="btn-secondary">Add</button>
+  </form>
+
+  {% if just_completed_last and project.status != "completed" %}
+    <div id="checklist-complete-prompt" class="mt-4 p-3 rounded bg-green-50 border border-green-200 text-sm">
+      <p class="text-green-800 mb-2">
+        All checklist items complete. Mark this project as Completed?
+      </p>
+      <div class="flex gap-2">
+        <form hx-post="{% url 'projects:checklist_mark_project_complete' project.pk %}"
+              hx-target="closest section"
+              hx-swap="outerHTML"
+              class="inline">
+          {% csrf_token %}
+          <button type="submit" class="btn-primary">Yes, mark Completed</button>
+        </form>
+        <button type="button"
+                onclick="document.getElementById('checklist-complete-prompt').remove()"
+                class="btn-secondary">Not yet</button>
+      </div>
+    </div>
+  {% endif %}
+</section>
