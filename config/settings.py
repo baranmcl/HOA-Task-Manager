@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "anymail",
     "axes",
     "apps.accounts",
     "apps.roster",
@@ -139,3 +140,17 @@ R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL", "")
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "")
 R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")
 R2_BUCKET = os.environ.get("R2_BUCKET", "")
+
+# Email — Resend via django-anymail. In prod (DEBUG=False) with the API key
+# configured, real mail goes out. In dev, or in prod with no key configured,
+# fall back to console backend (logs the message instead of sending) — keeps
+# the app from crashing if the key is ever lost or rotated mid-deploy.
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "tasks@cicahoa.com")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY", ""),
+}
+if not DEBUG and ANYMAIL["RESEND_API_KEY"]:
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+else:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

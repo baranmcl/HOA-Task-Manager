@@ -12,6 +12,7 @@ dependencies = [
     "python-dateutil>=2.9",
     "markdown>=3.6",
     "bleach>=6.1",
+    "django-anymail[resend]>=15.0",
 ]
 
 [dependency-groups]

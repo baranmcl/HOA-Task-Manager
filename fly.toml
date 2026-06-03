@@ -12,6 +12,9 @@ primary_region = "iad"
   DJANGO_ALLOWED_HOSTS = "*"
   DJANGO_CSRF_TRUSTED_ORIGINS = "https://hoa-task-manager-staging.fly.dev,https://tasks.cicahoa.com"
   DJANGO_DB_PATH = "/data/db.sqlite3"
+  # Outbound email — RESEND_API_KEY is a Fly secret; DEFAULT_FROM_EMAIL is
+  # public-safe since it's the visible From: header on every message.
+  DEFAULT_FROM_EMAIL = "tasks@cicahoa.com"
 
 [mounts]
   source = "data"
