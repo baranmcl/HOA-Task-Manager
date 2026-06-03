@@ -10,7 +10,7 @@ primary_region = "iad"
   # address with a non-public Host header. CSRF_TRUSTED_ORIGINS below stays
   # pinned to the real domain — that is the setting that gates form posts.
   DJANGO_ALLOWED_HOSTS = "*"
-  DJANGO_CSRF_TRUSTED_ORIGINS = "https://hoa-task-manager-staging.fly.dev"
+  DJANGO_CSRF_TRUSTED_ORIGINS = "https://hoa-task-manager-staging.fly.dev,https://tasks.cicahoa.com"
   DJANGO_DB_PATH = "/data/db.sqlite3"
 
 [mounts]
