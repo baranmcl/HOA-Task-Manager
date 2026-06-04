@@ -51,9 +51,14 @@ def board_view(request):
         cards.sort(key=lambda p: (p.projected_completion_date or _MAX_DATE, p.title))
         columns.append({"status": status_value, "label": label, "cards": cards})
 
+    any_filter_active = bool(
+        show_completed or (person_id is not None and selected_person != "all")
+    )
+
     return render(request, "projects/board.html", {
         "columns": columns,
         "show_completed": show_completed,
         "people": RosterPerson.active.all(),
         "selected_person": selected_person,
+        "any_filter_active": any_filter_active,
     })

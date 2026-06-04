@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Board — HOA Task Manager{% endblock %}
 {% block content %}
+{% include "_back_link.html" %}
 <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
   <h1 class="text-2xl font-semibold text-gray-900">Board</h1>
   <form method="get" class="flex items-center gap-3 text-sm flex-wrap">
@@ -19,6 +20,9 @@
              onchange="this.form.submit()">
       Show completed
     </label>
+    {% if any_filter_active %}
+      <a href="{% url 'projects:board' %}" class="text-sm text-gray-600 hover:underline">Clear filters</a>
+    {% endif %}
   </form>
 </div>
 

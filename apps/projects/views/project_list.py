@@ -16,6 +16,7 @@ SORT_CHOICES = {
 
 @login_required
 def list_view(request):
+    today = dt.date.today()
     qs = Project.instances.select_related("category").prefetch_related(
         "raci_assignments__person",
         "tags",
@@ -24,13 +25,39 @@ def list_view(request):
         attachment_count=Count("attachments", distinct=True),
     )
 
-    show_completed = request.GET.get("show_completed") == "1"
+    # Dashboard-tile shortcut filters. Each implies a specific
+    # combination of date + status filters; setting them takes precedence
+    # over the explicit show_completed/status query params for clarity.
+    overdue_only = request.GET.get("overdue") == "1"
+    upcoming_only = request.GET.get("upcoming") == "1"
+    completed_this_month = request.GET.get("completed_this_month") == "1"
+
+    show_completed = request.GET.get("show_completed") == "1" or completed_this_month
     if not show_completed:
         qs = qs.exclude(status=ProjectStatus.COMPLETED)
 
     status = request.GET.get("status")
     if status in dict(ProjectStatus.choices):
         qs = qs.filter(status=status)
+
+    if overdue_only:
+        qs = qs.exclude(status=ProjectStatus.COMPLETED).filter(
+            projected_completion_date__lt=today,
+            projected_completion_date__isnull=False,
+        )
+    if upcoming_only:
+        horizon = today + dt.timedelta(days=14)
+        qs = qs.exclude(status=ProjectStatus.COMPLETED).filter(
+            projected_completion_date__gte=today,
+            projected_completion_date__lte=horizon,
+        )
+    if completed_this_month:
+        first_of_month = today.replace(day=1)
+        qs = qs.filter(
+            status=ProjectStatus.COMPLETED,
+            actual_completion_date__gte=first_of_month,
+            actual_completion_date__lte=today,
+        )
 
     cat_id = request.GET.get("category")
     if cat_id and cat_id.isdigit():
@@ -85,6 +112,24 @@ def list_view(request):
         order_field = SORT_CHOICES.get(sort_key, "-updated_at")
         qs = qs.order_by(order_field)
 
+    # True when any non-default filter is active — drives the visibility
+    # of the "Clear filters" link on the list page.
+    any_filter_active = bool(
+        q or status or cat_id or person_id or role or tag_slug or due_filter
+        or show_completed or sort_key != "updated"
+        or overdue_only or upcoming_only or completed_this_month
+    )
+
+    # Banner text shown when one of the dashboard tile shortcuts is in
+    # play — gives the user context for the filtered view they landed on.
+    shortcut_label = ""
+    if overdue_only:
+        shortcut_label = "Overdue projects"
+    elif upcoming_only:
+        shortcut_label = "Upcoming projects (next 14 days)"
+    elif completed_this_month:
+        shortcut_label = "Done this month"
+
     return render(request, "projects/list.html", {
         "projects": qs,
         "categories": ProjectCategory.objects.all(),
@@ -99,6 +144,11 @@ def list_view(request):
         "show_completed": show_completed,
         "q": q,
         "due_filter": due_filter,
+        "overdue_only": overdue_only,
+        "upcoming_only": upcoming_only,
+        "completed_this_month": completed_this_month,
+        "shortcut_label": shortcut_label,
+        "any_filter_active": any_filter_active,
         "status_choices": ProjectStatus.choices,
         "role_choices": RACIRole.choices,
     })

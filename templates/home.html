@@ -15,24 +15,31 @@
   </form>
 </div>
 
+{% with person_q=selected_person|default:"" %}
+{% url 'projects:list' as projects_url %}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-  <div class="bg-white rounded-lg shadow p-4">
+  <a href="{{ projects_url }}?overdue=1{% if person_q and person_q != 'all' %}&person={{ person_q }}{% endif %}"
+     class="bg-white rounded-lg shadow p-4 hover:shadow-md transition block">
     <div class="text-xs uppercase text-gray-500">Overdue</div>
     <div class="text-3xl font-semibold {% if stats.overdue %}text-red-700{% endif %}">{{ stats.overdue }}</div>
-  </div>
-  <div class="bg-white rounded-lg shadow p-4">
+  </a>
+  <a href="{{ projects_url }}?upcoming=1{% if person_q and person_q != 'all' %}&person={{ person_q }}{% endif %}"
+     class="bg-white rounded-lg shadow p-4 hover:shadow-md transition block">
     <div class="text-xs uppercase text-gray-500">Upcoming (14d)</div>
     <div class="text-3xl font-semibold">{{ stats.upcoming }}</div>
-  </div>
-  <div class="bg-white rounded-lg shadow p-4">
+  </a>
+  <a href="{{ projects_url }}?status=in_progress{% if person_q and person_q != 'all' %}&person={{ person_q }}{% endif %}"
+     class="bg-white rounded-lg shadow p-4 hover:shadow-md transition block">
     <div class="text-xs uppercase text-gray-500">In progress</div>
     <div class="text-3xl font-semibold">{{ stats.in_progress }}</div>
-  </div>
-  <div class="bg-white rounded-lg shadow p-4">
+  </a>
+  <a href="{{ projects_url }}?completed_this_month=1{% if person_q and person_q != 'all' %}&person={{ person_q }}{% endif %}"
+     class="bg-white rounded-lg shadow p-4 hover:shadow-md transition block">
     <div class="text-xs uppercase text-gray-500">Done this month</div>
     <div class="text-3xl font-semibold">{{ stats.done_this_month }}</div>
-  </div>
+  </a>
 </div>
+{% endwith %}
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
   <section class="bg-white rounded-lg shadow p-5">
