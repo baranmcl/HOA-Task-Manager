@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Help — HOA Task Manager{% endblock %}
+{% block content %}
+{% include "_back_link.html" %}
+
+<div class="max-w-3xl">
+  <h1 class="text-2xl font-semibold text-gray-900 mb-2">Help & how-to</h1>
+  <p class="text-sm text-gray-600 mb-8">
+    A short guide to using the HOA Task Manager. If something isn't covered
+    here, check with whoever set up the app for your board.
+  </p>
+
+  <nav class="bg-white rounded-lg shadow p-4 mb-8 text-sm">
+    <p class="font-semibold text-gray-700 mb-2">Jump to:</p>
+    <ul class="space-y-1">
+      <li><a class="text-blue-700 hover:underline" href="#getting-started">Getting started</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#workflows">Daily workflows</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#raci">RACI explained</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#groups">Groups & committees</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#views">Views: Dashboard, Board, Calendar, Reports</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#invites">Inviting board members</a></li>
+      <li><a class="text-blue-700 hover:underline" href="#faq">FAQ</a></li>
+    </ul>
+  </nav>
+
+  <section id="getting-started" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Getting started</h2>
+    <p class="text-sm text-gray-700 mb-3">
+      The first time you log in, set up two things on your Account page:
+    </p>
+    <ol class="list-decimal list-inside text-sm text-gray-700 space-y-2 mb-3">
+      <li><strong>Your timezone</strong> — so dates and activity timestamps display correctly.</li>
+      <li><strong>Your roster person link</strong> — connects your login to your name on the roster, so when you make changes the activity log shows your name (not your email address).</li>
+    </ol>
+    <p class="text-sm text-gray-700">
+      If you forget your password, use the "Forgot password?" link on the
+      sign-in page — a reset link will be emailed to you. The link is good
+      for 3 days.
+    </p>
+  </section>
+
+  <section id="workflows" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Daily workflows</h2>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Create a new project</h3>
+    <ol class="list-decimal list-inside text-sm text-gray-700 space-y-1 mb-3">
+      <li>Click <strong>+ New project</strong> on the Projects page.</li>
+      <li>Fill in title, category, and (optionally) priority, due date, vendor, and budget.</li>
+      <li>Save. You can come back and edit any field individually from the project's detail page.</li>
+    </ol>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Assign people to a project (RACI)</h3>
+    <p class="text-sm text-gray-700 mb-2">
+      On the project page, the <strong>RACI</strong> section has a form to add
+      a person and a role (Responsible / Accountable / Consulted / Informed).
+      You can add multiple people per project, including the same person in
+      multiple roles.
+    </p>
+    <p class="text-sm text-gray-700 mb-3">
+      If you've set up a <em>group</em> (see below), you can add an entire
+      committee at once — pick the group instead of a single person.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Track progress with a checklist</h3>
+    <p class="text-sm text-gray-700 mb-2">
+      The <strong>Checklist</strong> section on each project lets you break a
+      project into steps. Add each step with an optional due date. Check items
+      off as you complete them.
+    </p>
+    <p class="text-sm text-gray-700 mb-3">
+      When you check the <em>last</em> item, the app asks if you want to mark
+      the whole project as Completed. You can say "Not yet" if there's more
+      to do.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Attach a vendor quote or photo</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      The <strong>Attachments</strong> section accepts PDFs, photos, and Office
+      documents (up to 10 MB per file, 50 MB per project total). Files are
+      stored securely off-site; only logged-in users can download them.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Leave a note</h3>
+    <p class="text-sm text-gray-700">
+      The <strong>Notes</strong> section is for context — "vendor came back
+      with a new bid", "spoke to the painter, scheduled for Friday", and so
+      on. Pin one note as the project summary so anyone reading the page can
+      catch up in 30 seconds. Notes support basic Markdown formatting.
+    </p>
+  </section>
+
+  <section id="raci" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">RACI explained</h2>
+    <p class="text-sm text-gray-700 mb-3">
+      RACI is a way to be clear about who's involved in a project and how. For
+      each project, each person can be:
+    </p>
+    <dl class="text-sm text-gray-700 space-y-2 mb-3">
+      <div><dt class="font-semibold inline">Responsible (R):</dt>
+        <dd class="inline">The one doing the work. Every project should have at least one.</dd></div>
+      <div><dt class="font-semibold inline">Accountable (A):</dt>
+        <dd class="inline">The one ultimately answerable for the outcome — usually the board officer who'll report on it.</dd></div>
+      <div><dt class="font-semibold inline">Consulted (C):</dt>
+        <dd class="inline">Someone whose input is needed before decisions.</dd></div>
+      <div><dt class="font-semibold inline">Informed (I):</dt>
+        <dd class="inline">Someone who just needs to know what's happening — no input expected.</dd></div>
+    </dl>
+    <p class="text-sm text-gray-700">
+      A common pattern: the project's chair is Accountable, a board member or
+      volunteer is Responsible, the relevant committee members are Consulted,
+      and the rest of the board is Informed.
+    </p>
+  </section>
+
+  <section id="groups" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Groups & committees</h2>
+    <p class="text-sm text-gray-700 mb-3">
+      Groups are named collections of people — typically committees like
+      "Finance Committee" or "Architecture Review". Set them up under
+      <strong>Roster → Groups</strong>.
+    </p>
+    <p class="text-sm text-gray-700 mb-3">
+      When a group is on a project's RACI, the "via &lt;Group&gt;" annotation
+      tells you how the assignment got there.
+    </p>
+    <p class="text-sm text-gray-700">
+      <strong>Important:</strong> changing a group's membership later does NOT
+      automatically update projects the group was already added to. If you add
+      a new committee member, go to each relevant project and click "Add group"
+      again to bring them in. Existing members are skipped — the operation is
+      idempotent, so only the new member gets a new row.
+    </p>
+  </section>
+
+  <section id="views" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Views: Dashboard, Board, Calendar, Reports</h2>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Dashboard</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      The home page. Shows four headline numbers (Overdue, Upcoming 14 days,
+      In progress, Done this month). Each is clickable — it'll take you to a
+      filtered project list. The "Showing tasks for" dropdown narrows the
+      whole dashboard to one person.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Board</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      A Kanban-style view: in-flight projects laid out as cards in columns by
+      status. Drag a card from one column to another to change its status —
+      activity log records the change automatically. The "Show completed"
+      checkbox brings in a fourth column when you want to celebrate.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Calendar</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      Month view of due dates. Project pills are colored by status; checklist
+      items show as outlined ☐ rows below the pills, with a left-border color
+      that's shared across all items belonging to the same project (so you
+      can visually trace which steps belong together). Click anything to open
+      the project. Filter by person, category, and status.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-4">Reports</h3>
+    <p class="text-sm text-gray-700">
+      Summary of completed projects over any date range. Use the preset
+      buttons (This month, Last quarter, etc.) or pick custom dates. Shows
+      headline numbers and a per-category breakdown — useful for talking
+      points at board meetings.
+    </p>
+  </section>
+
+  <section id="invites" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Inviting board members</h2>
+    <p class="text-sm text-gray-700 mb-3">
+      If you're a staff user, an "Invite user" link appears in the sidebar.
+      Enter the invitee's email; they get an email with a link to set their
+      own password. The link is good for 3 days. After they set their
+      password, they can sign in.
+    </p>
+    <p class="text-sm text-gray-700">
+      Invitees see the full app, just like you. There's no per-person
+      project-visibility separation — the design assumes everyone on the
+      board can see everything (which is how an HOA board actually operates).
+    </p>
+  </section>
+
+  <section id="faq" class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">FAQ</h2>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-3">My password reset link said "Link expired or invalid".</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      Try clicking it again. If that doesn't work, request a fresh link from
+      the "Forgot password?" page. (Email-safety scanners occasionally
+      pre-fetch links and can cause this on first click — rare, and the link
+      itself isn't actually invalidated.)
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-3">I deleted a project by mistake.</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      Deletes are permanent in the app. The database is backed up daily, so
+      restoring is possible but not self-serve — talk to whoever administers
+      the app.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-3">What's a "recurring template"?</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      A project marked as recurring (Monthly review, Quarterly audit, etc.)
+      automatically spawns a fresh project instance on each cycle. The
+      template itself doesn't show up on the board or calendar; the generated
+      instances do. Manage templates under the Recurring page in the sidebar.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-3">Can I export the data?</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      A CSV export is on the roadmap. For now, bulk-importing from CSV works
+      via the Import projects page.
+    </p>
+
+    <h3 class="font-semibold text-gray-800 mb-2 mt-3">What's the small "via Finance Committee" annotation on a RACI row?</h3>
+    <p class="text-sm text-gray-700 mb-3">
+      It means the assignment was added by expanding a group, rather than
+      one-by-one. The annotation is for audit reference; the row works exactly
+      the same as any other RACI assignment.
+    </p>
+  </section>
+</div>
+{% endblock %}

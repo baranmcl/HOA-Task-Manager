@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from apps.roster.models import RosterPerson
 
-from ..models import ChecklistItem, Project
+from ..models import ChecklistItem, Project, ProjectCategory, ProjectStatus
 from ._filters import resolve_person_filter
 
 _CAL = stdlib_calendar.Calendar(firstweekday=stdlib_calendar.SUNDAY)
@@ -24,6 +24,29 @@ STATUS_CHIP_CLASSES = {
     "in_progress": "bg-blue-100 text-blue-800",
     "not_started": "bg-gray-100 text-gray-700",
 }
+
+# Stable per-project border colors for checklist items. Hashing the
+# project pk → palette index gives the same color across cells for
+# the same project, so a user can visually trace "all the items
+# belonging to Bike Room Renovation are pink-bordered". 10 colors is
+# plenty for the realistic distinct-project count in any month.
+CHECKLIST_BORDER_PALETTE = [
+    "border-purple-500",
+    "border-pink-500",
+    "border-yellow-500",
+    "border-orange-500",
+    "border-teal-500",
+    "border-indigo-500",
+    "border-amber-500",
+    "border-lime-500",
+    "border-rose-500",
+    "border-cyan-500",
+]
+
+
+def project_border_class(project_pk: int) -> str:
+    """Deterministic color class for a project's checklist items."""
+    return CHECKLIST_BORDER_PALETTE[project_pk % len(CHECKLIST_BORDER_PALETTE)]
 
 
 def build_month_grid(year: int, month: int) -> tuple[dt.date, dt.date, list[list[dt.date]]]:
@@ -51,14 +74,29 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
 
     person_id, banner, selected_person = resolve_person_filter(request)
 
+    cat_id_raw = request.GET.get("category", "").strip()
+    selected_category = cat_id_raw if cat_id_raw.isdigit() else ""
+    status_raw = request.GET.get("status", "")
+    selected_status = status_raw if status_raw in dict(ProjectStatus.choices) else ""
+
     first, last, weeks = build_month_grid(year, month)
 
-    qs = Project.instances.select_related("category").filter(
+    # Build the base queryset of "projects whose own due date falls in
+    # this window" and a separate "all projects matching the filters"
+    # set used to scope checklist-item visibility.
+    base_qs = Project.instances.select_related("category")
+    if person_id is not None:
+        base_qs = base_qs.filter(raci_assignments__person_id=person_id)
+    if selected_category:
+        base_qs = base_qs.filter(category_id=int(selected_category))
+    if selected_status:
+        base_qs = base_qs.filter(status=selected_status)
+    base_qs = base_qs.distinct()
+
+    qs = base_qs.filter(
         projected_completion_date__gte=first,
         projected_completion_date__lte=last,
     )
-    if person_id is not None:
-        qs = qs.filter(raci_assignments__person_id=person_id).distinct()
     projects = list(qs)
 
     # Bucket projects by their due date.
@@ -67,21 +105,13 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
         by_date.setdefault(p.projected_completion_date, []).append(p)
 
     # Checklist items: show incomplete items with due dates in this window.
-    # Visibility follows project visibility — if the user's person filter
-    # hides a project, its checklist items are hidden too. We use the same
-    # `Project.instances` filter as projects (above) so the visibility
-    # rules match exactly.
+    # Visibility follows project visibility — items from projects hidden
+    # by filters are also hidden. The visible set is the union of
+    # "projects with due dates in window" and "all projects matching
+    # filters" (the latter covers projects without their own due dates
+    # but with dated checklist items).
     visible_project_ids = {p.pk for p in projects}
-    # Also include checklist items from projects whose project itself
-    # doesn't have a due_date in this month, but the item does. That
-    # means we need to look up project visibility separately.
-    item_project_qs = Project.instances
-    if person_id is not None:
-        item_project_qs = item_project_qs.filter(
-            raci_assignments__person_id=person_id,
-        ).distinct()
-    eligible_project_ids = set(item_project_qs.values_list("pk", flat=True))
-    visible_project_ids |= eligible_project_ids
+    visible_project_ids |= set(base_qs.values_list("pk", flat=True))
 
     items_qs = ChecklistItem.objects.filter(
         project_id__in=visible_project_ids,
@@ -90,8 +120,11 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
         due_date__gte=first,
         due_date__lte=last,
     ).select_related("project")
+
+    # Attach a stable border color per item, derived from its project pk.
     items_by_date: dict[dt.date, list[ChecklistItem]] = {}
     for item in items_qs:
+        item.border_class = project_border_class(item.project_id)
         items_by_date.setdefault(item.due_date, []).append(item)
 
     # Build the cell structure the template iterates over.
@@ -118,6 +151,12 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
     prev_year, prev_month = (year, month - 1) if month > 1 else (year - 1, 12)
     next_year, next_month = (year, month + 1) if month < 12 else (year + 1, 1)
 
+    any_filter_active = bool(
+        (person_id is not None and selected_person != "all")
+        or selected_category
+        or selected_status
+    )
+
     return render(request, "projects/calendar.html", {
         "year": year,
         "month": month,
@@ -129,6 +168,11 @@ def calendar_view(request, year: int | None = None, month: int | None = None):
         "weekday_headers": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
         "status_chip_classes": STATUS_CHIP_CLASSES,
         "people": RosterPerson.active.all(),
+        "categories": ProjectCategory.objects.all(),
+        "status_choices": ProjectStatus.choices,
         "selected_person": selected_person,
+        "selected_category": selected_category,
+        "selected_status": selected_status,
+        "any_filter_active": any_filter_active,
         "unlinked_user_banner": banner,
     })

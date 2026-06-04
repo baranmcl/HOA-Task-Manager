@@ -30,6 +30,7 @@ _BACK_LABELS = {
     "roster:group_list": "Groups",
     "roster:group_detail": "Group",
     "accounts:profile": "Account",
+    "help": "Help",
 }
 
 

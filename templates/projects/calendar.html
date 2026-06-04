@@ -2,25 +2,67 @@
 {% block title %}Calendar — HOA Task Manager{% endblock %}
 {% block content %}
 {% include "_back_link.html" %}
-<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+<div class="flex items-center justify-between mb-4 flex-wrap gap-3">
   <h1 class="text-2xl font-semibold text-gray-900">Calendar — {{ month_label }}</h1>
-  <div class="flex items-center gap-3 text-sm flex-wrap">
-    <form method="get" class="flex items-center gap-2">
-      <label for="calendar-person" class="text-gray-700">Showing tasks for:</label>
-      <select id="calendar-person" name="person" class="input" onchange="this.form.submit()">
-        <option value="all" {% if selected_person == "all" %}selected{% endif %}>All people</option>
-        {% for p in people %}
-          <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
-        {% endfor %}
-      </select>
-    </form>
-    <div class="flex gap-2">
-      <a href="{% url 'projects:calendar_at' prev_year prev_month %}" class="btn-secondary">← Prev</a>
-      <a href="{% url 'projects:calendar_at' today_year today_month %}" class="btn-secondary">Today</a>
-      <a href="{% url 'projects:calendar_at' next_year next_month %}" class="btn-secondary">Next →</a>
-    </div>
+  <div class="flex gap-2">
+    <a href="{% url 'projects:calendar_at' prev_year prev_month %}" class="btn-secondary">← Prev</a>
+    <a href="{% url 'projects:calendar_at' today_year today_month %}" class="btn-secondary">Today</a>
+    <a href="{% url 'projects:calendar_at' next_year next_month %}" class="btn-secondary">Next →</a>
   </div>
 </div>
+
+<form method="get" class="bg-white rounded-lg shadow p-3 mb-4 flex flex-wrap items-center gap-3 text-sm">
+  <label class="flex items-center gap-2">
+    <span class="text-gray-700">Person:</span>
+    <select name="person" class="input" onchange="this.form.submit()">
+      <option value="all" {% if selected_person == "all" %}selected{% endif %}>All people</option>
+      {% for p in people %}
+        <option value="{{ p.pk }}" {% if selected_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="flex items-center gap-2">
+    <span class="text-gray-700">Category:</span>
+    <select name="category" class="input" onchange="this.form.submit()">
+      <option value="">All categories</option>
+      {% for c in categories %}
+        <option value="{{ c.pk }}" {% if selected_category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="flex items-center gap-2">
+    <span class="text-gray-700">Status:</span>
+    <select name="status" class="input" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  {% if any_filter_active %}
+    <a href="{% url 'projects:calendar_at' year month %}" class="text-gray-600 hover:underline">Clear filters</a>
+  {% endif %}
+</form>
+
+<details class="mb-4 text-xs">
+  <summary class="cursor-pointer text-gray-600 hover:text-gray-900">Legend — what the colors mean</summary>
+  <div class="mt-2 bg-white rounded-lg shadow p-3 space-y-2">
+    <div>
+      <span class="font-medium text-gray-700">Filled chip</span> = project, colored by status:
+      <span class="pill bg-gray-100 text-gray-700 ml-1">Not started</span>
+      <span class="pill bg-blue-100 text-blue-800 ml-1">In progress</span>
+      <span class="pill bg-red-100 text-red-800 ml-1">Delayed</span>
+      <span class="pill bg-green-100 text-green-800 ml-1">Completed</span>
+    </div>
+    <div>
+      <span class="font-medium text-gray-700">☐ outlined item</span> = checklist step, left-border color shared across all items from the same project. Text turns
+      <span class="text-red-700">red</span> when overdue.
+    </div>
+    <div class="text-gray-500">
+      Click any chip or item to open its project.
+    </div>
+  </div>
+</details>
 
 <div class="bg-white rounded-lg shadow overflow-hidden">
   <table class="w-full border-collapse text-sm">
@@ -53,9 +95,9 @@
                 {% endif %}
                 {% for item in cell.checklist_items %}
                   <a href="{% url 'projects:detail' item.project.pk %}"
-                     class="block truncate text-xs leading-tight {% if item.is_overdue %}text-red-700{% else %}text-gray-600{% endif %} hover:underline"
+                     class="block truncate text-xs leading-tight pl-1.5 border-l-2 {{ item.border_class }} {% if item.is_overdue %}text-red-700{% else %}text-gray-700{% endif %} hover:underline"
                      title="{{ item.project.title }}: {{ item.text }}">
-                    ☐ {{ item.text|truncatechars:20 }}
+                    ☐ {{ item.text|truncatechars:18 }}
                   </a>
                 {% endfor %}
               </div>

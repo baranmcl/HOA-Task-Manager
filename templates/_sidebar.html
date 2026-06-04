@@ -18,6 +18,7 @@
       <a href="{% url 'accounts:invite_user' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Invite user</a>
     {% endif %}
     <a href="{% url 'accounts:profile' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Account</a>
+    <a href="{% url 'help' %}" class="block px-3 py-2 rounded hover:bg-gray-100">Help</a>
     <form method="post" action="{% url 'accounts:logout' %}" class="pt-4">
       {% csrf_token %}
       <button type="submit" class="w-full text-left px-3 py-2 rounded hover:bg-gray-100">Log out</button>
