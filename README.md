@@ -4,8 +4,11 @@ A small, opinionated project tracker for an HOA board. Built to replace
 the usual mix of spreadsheets, email chains, and "didn't we discuss that
 in April?"
 
-- **Live staging:** <https://hoa-task-manager-staging.fly.dev> (custom domain coming soon)
+- **Live:** <https://tasks.cicahoa.com> (also at `hoa-task-manager-staging.fly.dev`)
 - **Walkthrough for board members:** [`docs/board-presentation.md`](docs/board-presentation.md)
+- **In-app help & FAQ:** <https://tasks.cicahoa.com/help/>
+- **Operational continuity plan:** [`CONTINUITY.md`](CONTINUITY.md) — read this
+  if you're picking up maintenance from a previous maintainer
 - **Source:** <https://github.com/baranmcl/HOA-Task-Manager>
 
 ## What it does
