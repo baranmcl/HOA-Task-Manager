@@ -22,6 +22,7 @@ urlpatterns = [
     path("import/", views.import_form, name="import_form"),
     path("import/confirm/", views.import_confirm, name="import_confirm"),
     path("import/template/", views.import_template, name="import_template"),
+    path("export.csv", views.export_csv, name="export_csv"),
     path("bulk-delete/", views.bulk_delete, name="bulk_delete"),
 
     # --- HTMX / action endpoints (detail page) ---

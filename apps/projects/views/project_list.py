@@ -14,16 +14,21 @@ SORT_CHOICES = {
 }
 
 
-@login_required
-def list_view(request):
+def apply_list_filters(request):
+    """Apply the project-list filters from the request's GET params.
+
+    Returns (queryset, context_dict). The context_dict captures both
+    the selected_* values for re-rendering the filter form and the
+    boolean shortcut flags (overdue_only / upcoming_only /
+    completed_this_month). Both list_view (HTML render) and the CSV
+    export view reuse this so the export naturally respects whatever
+    filters the user has applied in the list.
+
+    Annotations + prefetches are NOT applied here; callers add the
+    ones their template/output shape needs.
+    """
     today = dt.date.today()
-    qs = Project.instances.select_related("category").prefetch_related(
-        "raci_assignments__person",
-        "tags",
-    ).annotate(
-        note_count=Count("notes", distinct=True),
-        attachment_count=Count("attachments", distinct=True),
-    )
+    qs = Project.instances.select_related("category")
 
     # Dashboard-tile shortcut filters. Each implies a specific
     # combination of date + status filters; setting them takes precedence
@@ -130,11 +135,7 @@ def list_view(request):
     elif completed_this_month:
         shortcut_label = "Done this month"
 
-    return render(request, "projects/list.html", {
-        "projects": qs,
-        "categories": ProjectCategory.objects.all(),
-        "people": RosterPerson.active.all(),
-        "tags": Tag.objects.all(),
+    return qs, {
         "selected_status": status or "",
         "selected_category": cat_id or "",
         "selected_person": person_id or "",
@@ -149,6 +150,28 @@ def list_view(request):
         "completed_this_month": completed_this_month,
         "shortcut_label": shortcut_label,
         "any_filter_active": any_filter_active,
+    }
+
+
+@login_required
+def list_view(request):
+    qs, ctx = apply_list_filters(request)
+    # The HTML template needs note + attachment counts on each row,
+    # plus prefetched RACI/tags for the row partial.
+    qs = qs.prefetch_related(
+        "raci_assignments__person",
+        "tags",
+    ).annotate(
+        note_count=Count("notes", distinct=True),
+        attachment_count=Count("attachments", distinct=True),
+    )
+
+    ctx.update({
+        "projects": qs,
+        "categories": ProjectCategory.objects.all(),
+        "people": RosterPerson.active.all(),
+        "tags": Tag.objects.all(),
         "status_choices": ProjectStatus.choices,
         "role_choices": RACIRole.choices,
     })
+    return render(request, "projects/list.html", ctx)

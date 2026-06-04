@@ -6,7 +6,14 @@
   <h1 class="text-2xl font-semibold text-gray-900">
     {% if shortcut_label %}{{ shortcut_label }}{% else %}Projects{% endif %}
   </h1>
-  <a href="{% url 'projects:create' %}" class="btn-primary">+ New project</a>
+  <div class="flex gap-2">
+    <a href="{% url 'projects:export_csv' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}"
+       class="btn-secondary"
+       title="Download the current filtered view as a CSV file">
+      ⤓ Export CSV
+    </a>
+    <a href="{% url 'projects:create' %}" class="btn-primary">+ New project</a>
+  </div>
 </div>
 
 <form method="get" class="bg-white rounded-lg shadow p-4 mb-6 grid grid-cols-1 md:grid-cols-8 gap-3 text-sm">
